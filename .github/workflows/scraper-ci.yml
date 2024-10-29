@@ -27,5 +27,5 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run tests
-        working-directory: scrapers
+        working-directory: scrapers/tests/
         run: pytest --maxfail=1 --disable-warnings
