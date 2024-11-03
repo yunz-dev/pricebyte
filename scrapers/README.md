@@ -47,7 +47,6 @@ The scraper should return a structured JSON object containing key product detail
   "category": "Fruits & Vegetables",
   "price": 3.99,
   "unit_price": 0.80,
-  "discount_price": 3.50,
   "original_price": 3.99,
   "availability": "In Stock",
   "image_url": "https://www.examplegrocery.com/images/bananas.jpg",
