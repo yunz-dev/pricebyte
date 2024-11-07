@@ -13,6 +13,7 @@ pages = [
 ]
 
 
+# test
 def load_page(w, product_id: int, page_id: int) -> str:
     w.get(pages[page_id] + str(product_id))
     # Give it some time to load the page
@@ -21,6 +22,7 @@ def load_page(w, product_id: int, page_id: int) -> str:
 
 
 def jsonify(s: str) -> object:
+    """Takes string and converts to json"""
     # Delete everything until the first '{'
     index_open = s.find("{")
     if index_open != -1:
