@@ -42,6 +42,7 @@ def get_data(product_id: int) -> Product:
     # Set up Firefox options
     options = Options()
     options.set_preference("devtools.jsonview.enabled", False)
+    options.add_argument("--headless")
     webdriver = webdriver.Firefox(options=options)
     load_page(webdriver, product_id, 0)
     brief, detailed = (
