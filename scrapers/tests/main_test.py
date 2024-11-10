@@ -19,10 +19,10 @@ def test_read_root():
     assert response.status_code == 404
 
 
-# def test_woolies_redbull():
-#     """Test the woolies id endpoint with redbull"""
-#     response = client.get("/woolies-store/id/162609")
-#     assert response.status_code == 200
+def test_woolies_redbull():
+    """Test the woolies id endpoint with redbull"""
+    response = client.get("/woolies-store/id/162609")
+    assert response.status_code == 200
 
 
 # def test_woolies_bad_id():
