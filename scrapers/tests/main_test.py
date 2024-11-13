@@ -25,7 +25,7 @@ def test_woolies_redbull():
     assert response.status_code == 200
 
 
-# def test_woolies_bad_id():
-#     """Test the woolies id endpoint with invalid id"""
-#     response = client.get("/woolies-store/id/1234567880")
-#     assert response.status_code == 500
+def test_woolies_redbull_curr():
+    """Test the woolies id endpoint with redbull"""
+    response = client.get("/woolies-store/id/162609/")
+    assert response.status_code == 200
