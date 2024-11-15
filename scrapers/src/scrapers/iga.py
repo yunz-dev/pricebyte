@@ -1,5 +1,6 @@
 import requests
-from model import Product
+from utils.model import Product
+import re
 
 
 def fetch_product(url: str, store: int, product: int) -> dict:
@@ -11,33 +12,51 @@ def fetch_product(url: str, store: int, product: int) -> dict:
         print(f"Error fetching data: {e}")
         return {}
 
+def get_product_id(product_url: str) -> int:
+    try:
+        return int(product_url.split("-")[-1])
+    except ValueError:
+        return -1
 
-def parse_data(data: dict = None):
-    price = data.get("price")
-    unit_price = data.get("unitPrice")
-    name = data.get("name")
-    brand = data.get("brand")
-    weight = data.get("unitsOfSize", {}).get("size")
-    store = None
-    category = data.get("defaultCategory")
-    image_url = data.get("primaryImage", {}).get("default")
-    product_url = None
-    description = data.get("description")
-    original_price = data.get("wasPrice")
-    availability = data.get("available")
-    print(f"Price: {price}")
-    print(f"Unit Price: {unit_price}")
-    print(f"Name: {name}")
-    print(f"Brand: {brand}")
-    print(f"Weight: {weight}g")
-    print(f"Store: {store}")
-    print(f"Category: {category}")
-    print(f"Image URL: {image_url}")
-    print(f"Product URL: {product_url}")
-    print(f"Description: {description}")
-    print(f"Original Price: {original_price}")
-    print(f"Available: {availability}")
+def get_iga_product(product_url: str, store_id: int = 32600) -> Product:
+    product_id = get_product_id(product_url)
+    data = fetch_product("https://www.igashop.com.au/api/storefront", store_id, product_id)
 
+    # combine weight and weight type
+    weight_data = data.get("unitsOfSize", {})
+    weight = weight_data.get("size")
+    match weight_data.get("type"):
+        case "kilogram":
+            weight_type = "kg"
+        case "gram":
+            weight_type = "g"
+        case "litre":
+            weight_type = "L"
+        case "millilitre":
+            weight_type = "mL"
+        case _:
+            weight_type = "g"
 
-data = fetch_product("https://www.igashop.com.au/api/storefront", 32600, 777071)
-parse_data(data)
+    # replace all letters and symbols in price data
+    try:
+        price = float(re.sub(r'[^0-9.]', '', data.get("price")))
+        unit_price = float(re.sub(r'[^0-9.]', '', data.get("unitPrice")))
+    except ValueError:
+        price = -1
+        unit_price = -1
+
+    return Product(
+        store="IGA Store",
+        product_name=data.get("name"),
+        brand=data.get("brand"),
+        category=data.get("defaultCategory"),
+        price=price,
+        unit_price=unit_price,
+        original_price=data.get("wasPrice") if data.get("wasPrice") else -1,
+        availability=data.get("available"),
+        image_url=data.get("primaryImage", {}).get("default"),
+        product_url=product_url,
+        weight=f"{weight}{weight_type}",
+        description=data.get("description").replace("<br/>", "").replace("<br />", "").replace("|", " |"),
+    )
+
