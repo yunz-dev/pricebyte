@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from scrapers.woolies import get_data
-
+from scrapers.iga import get_iga_product
 app = FastAPI(
     title="PriceByte Scraping API",
     description="Scrape Woolies, Coles and Aldi",
@@ -35,6 +35,17 @@ def get_woolies_store_by_id(product_id: int):
     """
     return get_data(product_id)
 
+@app.get("/iga-store/store/{store_id}/id/{product_id}")
+def get_iga_product_by_id(product_id: int, store_id: int):
+    """
+
+    Parameters:
+    - **product_id** (int): the id of the iga product
+
+    Returns:
+    - **json**: product details
+    """
+    return get_iga_product(product_id, store_id)
 
 # NOTE: USELESS
 # @app.get("/woolies-store/page/")

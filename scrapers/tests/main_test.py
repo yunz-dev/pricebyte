@@ -24,6 +24,10 @@ def test_woolies_redbull():
     response = client.get("/woolies-store/id/162609")
     assert response.status_code == 200
 
+def test_iga_shapes():
+    """Test the iga id endpoint with Arnott's shapes"""
+    response = client.get("/iga-store/store/32600/id/305099")
+    assert response.status_code == 200
 
 def test_woolies_redbull_curr():
     """Test the woolies id endpoint with redbull"""
