@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup, NavigableString, Tag
-from model import Product
+from utils.model import Product
 
 def clean_str(string: str) -> str:
     return string.replace("\n\t", "").strip()
