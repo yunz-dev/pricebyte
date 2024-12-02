@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 from utils.model import Product
 
 def clean_str(string: str) -> str:
-    return string.replace("\n\t", "").strip()
+    to_del = {ord(k): None for k in ['\n', '\t']}
+    return string.strip().translate(to_del)
 
 
 def get_all_content(tags: list[Tag]) -> list[str]:
