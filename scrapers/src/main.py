@@ -49,7 +49,7 @@ def get_iga_product_by_id(product_id: int, store_id: int):
     """
     return get_iga_product(product_id, store_id)
 
-@app.get("/aldi-store/url/")
+@app.get("/aldi-store/url")
 def get_aldi_product_by_url(product_url: str):
     """
 

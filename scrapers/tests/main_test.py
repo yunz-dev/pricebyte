@@ -33,3 +33,8 @@ def test_woolies_redbull_curr():
     """Test the woolies id endpoint with redbull"""
     response = client.get("/woolies-store/id/162609/")
     assert response.status_code == 200
+
+def test_aldi_milk():
+    """Test the aldi url endpoint with milk"""
+    response = client.get("/aldi-store/url?product_url=https://www.aldi.com.au/groceries/fresh-produce/dairy-eggs/dairy-eggs-detail/ps/p/farmdale-full-cream-milk-uht-1l/")
+    assert response.status_code == 200
