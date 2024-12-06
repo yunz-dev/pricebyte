@@ -96,6 +96,8 @@ def parse_name(detail: Tag) -> str:
 
 
 def parse_desc(desc_ul: Tag) -> str:
+    if not desc_ul:
+        return ""
     li_s = desc_ul.find_all("li")
     desc_arr = get_all_content(li_s)
     return ", ".join(desc_arr)
