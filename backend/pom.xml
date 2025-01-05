@@ -76,6 +76,12 @@
 			<artifactId>spring-graphql-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.24</version> <!-- You can check for the latest version -->
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

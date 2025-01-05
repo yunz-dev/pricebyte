@@ -1,3 +1,13 @@
 spring:
     application:
         name: pricebyte
+    datasource:
+        url: ${SUPABASE_DB_URL}
+        username: ${SUPABASE_DB_USER}
+        password: ${SUPABASE_DB_PASS}
+        driver-class-name: org.postgresql.Driver
+    jpa:
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+        hibernate:
+            ddl-auto: update
+        show-sql: true
