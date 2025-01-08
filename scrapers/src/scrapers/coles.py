@@ -1,25 +1,29 @@
-# from utils.model import Product
+from utils.model import ColesProductV1
 import requests
 import time
 import math
 
 build_id = "20250905.1-05c3ec1671ec3cc5e81508a6fa1ba52812155cc3" # Cannot be acquired with API, must be scraped with Selenium or PlayWright
-categories = {"Meat and Seafood": "meat-seafood", "Fruit and Vegtables": "fruit-vegetables", "Dairy Eggs and Fridge": "dairy-eggs-fridge", 
-              "Bakery": "bakery", "Deli Foods": "deli", "Pantry": "pantry", "Dietary World Foods": "dietary-world-foods", 
-              "Snacks and Chocolates": "chips-chocolates-snacks", "Drinks": "drinks", "Frozen": "frozen", "Household": "household", 
-              "Health and Beauty": "health-beauty", "Baby": "baby", "Pet": "pet", "Liquorland": "liquorland", "Tobacco": "tobacco"}
 
-def scrape_coles_category(category_name="deli"):
+coles_categories = {
+    "Meat and Seafood": "meat-seafood", "Fruit and Vegtables": "fruit-vegetables", "Dairy Eggs and Fridge": "dairy-eggs-fridge", 
+    "Bakery": "bakery", "Deli Foods": "deli", "Pantry": "pantry", "Dietary World Foods": "dietary-world-foods", 
+    "Snacks and Chocolates": "chips-chocolates-snacks", "Drinks": "drinks", "Frozen": "frozen", "Household": "household", 
+    "Health and Beauty": "health-beauty", "Baby": "baby", "Pet": "pet", "Liquorland": "liquorland", "Tobacco": "tobacco"
+}
+
+def scrape_coles_category(category_name="deli") -> list[ColesProductV1]:
     """
     Scrapes all products from a given category.
     Parameters:
         category_name (str):    Name of the category to scrape
     Returns:
-        all_products (list):    List of dictionaries each representing a product of the category
+        all_products (list):    List of ColesProductV1 models each representing a product of the category
     """
+    
     product_list = []
 
-    # Construct the base URL for the API calls
+    # Construct the base URL for the API call
     base_url = f"https://www.coles.com.au/_next/data/{build_id}/en/browse/{category_name}.json?slug={category_name}"
 
     page_number = 1
@@ -51,15 +55,27 @@ def scrape_coles_category(category_name="deli"):
             total_results = search_results.get('noOfResults', 0)
             if page_number == 1: # Only print it once
                 total_pages = math.ceil(total_results / page_size)
-                print(f"Found {total_results} total results, spread across {total_pages} pages.")
+                print(f"Found {total_results} total results, across {total_pages} pages.")
 
-            print(f"Scraping page {page_number}...")
+            print(f"Scraping page {page_number}")
+
             for item in results:
                 # Only process product items
                 if item.get('_type') == 'PRODUCT':
-                    product_list.append(item)
+                    pricing = item.get('pricing') or {}
+                    unit_pricing = pricing.get('unit', {})
+                    product = ColesProductV1(
+                        id=item.get("id"),
+                        name=item.get("name"),
+                        brand=item.get("brand", "N/A"),
+                        price=pricing.get('now'),
+                        old_price=pricing.get('was'),
+                        on_sale=1 if pricing.get('onlineSpecial') else 0,
+                        unit_price=unit_pricing.get('price')
+                    )
+                    product_list.append(product)
             
-            # Increment the page number for next page
+            # Increment the page number
             page_number += 1
             
             time.sleep(1) 
