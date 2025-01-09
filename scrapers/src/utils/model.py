@@ -31,6 +31,7 @@ class ApiProducts(BaseModel):
 
 
 class ColesProductV1(BaseModel):
+    store: str
     id: int
     name: str
     brand: str
