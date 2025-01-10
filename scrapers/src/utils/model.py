@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from enum import Enum
 
 class Product(BaseModel):
     store: str
@@ -28,3 +28,17 @@ class ApiProduct(BaseModel):
 class ApiProducts(BaseModel):
     api_uses: int
     products: list[ApiProduct]
+
+# --------------------- Version 2 Models ---------------------
+
+class Store(str, Enum):
+    ALDI = "ALDI"
+    Woolworths = "Woolworths"
+    Coles = "Coles"
+    IGA = "IGA"
+
+class PriceUpdates(BaseModel):
+    store_product_id: int
+    store: Store
+    new_price: int
+
