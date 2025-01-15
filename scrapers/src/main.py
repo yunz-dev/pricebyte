@@ -1,5 +1,5 @@
-from utils.model import Scraper
 from typing import List, Tuple
+from utils.model import Scraper
 
 
 def main():
