@@ -1,8 +1,11 @@
 from utils.model import Scraper
 from typing import List, Tuple
+from config import parse_and_set_env
 
 
 def main():
+    parse_and_set_env()
+
     scraper_list = [
         # Add scrapers here
     ]
@@ -58,10 +61,3 @@ def send_to_scala(data) -> bool:
 
 if __name__ == "__main__":
     main()
-
-
-# run a category scraper
-# check each id with sqlite
-# return a list a price_updates
-# have a list of new_product_ids
-
