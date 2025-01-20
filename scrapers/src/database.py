@@ -39,7 +39,8 @@ class ComplexProduct(Base):
 class MainDatabase:
     def __init__(self, db_name: str = "main", echo: bool = False):
         self.db_name = db_name
-        self.engine = create_engine(f"sqlite:///{db_name}.db", echo=echo)
+        self.engine = create_engine(
+            f"sqlite:///sqlite/{db_name}.db", echo=echo)
         self.Session = sessionmaker(bind=self.engine)
         self._setup_database()
 
@@ -204,7 +205,8 @@ class MainDatabase:
 class MockDatabase:
     def __init__(self, db_name: str = "mock", echo: bool = False):
         self.db_name = db_name
-        self.engine = create_engine(f"sqlite:///{db_name}.db", echo=echo)
+        self.engine = create_engine(
+            f"sqlite:///sqlite/{db_name}.db", echo=echo)
         self.Session = sessionmaker(bind=self.engine)
         self._setup_database()
 
