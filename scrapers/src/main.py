@@ -1,4 +1,5 @@
 from database import MainDatabase, MockDatabase
+from mockscraper import MockScraperAldi
 from utils.model import PriceUpdates, ProductInfo, Scraper
 from typing import List
 from config import is_production, parse_and_set_env, is_mock
@@ -13,6 +14,7 @@ def main():
     scraper_list = (
         [
             # Add Mock Scrapers here
+            MockScraperAldi()
         ]
         if is_mock()
         else [
