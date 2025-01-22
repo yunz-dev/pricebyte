@@ -1,9 +1,13 @@
 from database import MainDatabase, MockDatabase
 from mockscraper import MockScraperAldi
+from scrapers.aldiV2 import AldiScraper
+
+# still not working i fix later ->>>>
+# from scrapers.wooliesV2 import WoolworthsScraper
 from utils.model import PriceUpdates, ProductInfo, Scraper
 from typing import List
 from config import is_production, parse_and_set_env, is_mock
-from log import log
+from log import log, detailed_log
 
 main_db = MainDatabase()
 test_db = MockDatabase()
@@ -18,6 +22,8 @@ def main():
         ]
         if is_mock()
         else [
+            AldiScraper(),
+            # WoolworthsScraper()
             # Add real scrapers here
         ]
     )
@@ -33,7 +39,9 @@ def main():
     log("SUCCESS ==========================================")
 
 
-def category_scrape(scraper_list: List[Scraper]) -> List[List[PriceUpdates]]:
+# i took away type hints temporarily for this cuz linter was going crazy
+# def category_scrape(scraper_list: List[Scraper]) -> List[List[PriceUpdates]]:
+def category_scrape(scraper_list) -> List[List[PriceUpdates]]:
     log("scraping categories")
     stores = []
 
@@ -81,6 +89,8 @@ def product_price_check(scraper: Scraper, product_list: List[PriceUpdates]) -> i
     return prices_changed
 
 
+# TODO:
+# change logs to detailed logs later
 def send_to_data_processer(data: ProductInfo):
     id, store, name, price, details = (
         data.store_product_id,
