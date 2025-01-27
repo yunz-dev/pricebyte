@@ -25,6 +25,7 @@ class ColesScraper(Scraper):
             "Frozen": "frozen", "Household": "household", "Health and Beauty": "health-beauty", 
             "Baby": "baby", "Pet": "pet", "Liquorland": "liquorland", "Tobacco": "tobacco"
         }
+        self.categories = {"Meat and Seafood": "meat-seafood"}
 
     def scrape_category(self) -> List[PriceUpdates]:
         """Scrape all categories and return a list of PriceUpdates"""
@@ -70,7 +71,7 @@ class ColesScraper(Scraper):
                             # TODO: Solve items being unavailable having no price attribute (default set to -1 currently)
                             priceUpdate = PriceUpdates(
                                 store_product_id=item.get("id"),
-                                product_name=item.get("name"),
+                                product_name=f"{item.get("brand")} {item.get("name")} {item.get("size")}",
                                 store=Store.Coles,
                                 price=(item.get('pricing') or {}).get("now") or -1
                             )
@@ -97,9 +98,9 @@ class ColesScraper(Scraper):
         """Fetch detailed information for a specific product"""
 
         try:
-            product_name_url = "-".join(product.product_name.replace("|", "").split())
-            url = f"{self.detail_url}/{product_name_url}-{product.store_product_id}.json?slug={product_name_url}-{product.store_product_id}"
-
+            product_name_url = "-".join(product.product_name.replace("|", "").lower().split())
+            log(product_name_url)
+            url = f"{self.detail_url}{product_name_url}-{product.store_product_id}.json?slug={product_name_url}-{product.store_product_id}"
             response = requests.get(
                 url, headers=self.headers, timeout=10
             )
@@ -116,26 +117,7 @@ class ColesScraper(Scraper):
 
             product_data = response.json().get("pageProps", {}).get("product")
 
-            details = {
-                "name": product_data.get("name"),
-                "brand": product_data.get("brand"),
-                "description": product_data.get("longDescription"),
-                "size": product_data.get("size"),
-                "unit_price": product_data.get("pricing", {}).get("unit", {}).get("price") or -1,
-                "unit_size": product_data.get("pricing", {}).get("unit", {}).get("ofMeasureQuantity") or -1,
-                "unit_measure": product_data.get("pricing", {}).get("unit", {}).get("ofMeasureUnits") or -1,
-                "allergens": [x["description"] for x in product_data.get("additionalInfo") if x["title"] == "Allergens"],
-                "ingredients": [x["description"] for x in product_data.get("additionalInfo") if x["title"] == "Ingredients"],
-                "storage": [x["description"] for x in product_data.get("additionalInfo") if x["title"] == "Storage instructions"],
-                "dimensions": [x["description"] for x in product_data.get("additionalInfo") if x["title"] == "Dimensions"],
-                "country_of_origin": product_data.get("countryOfOrigin", {}).get("country", ""),
-                "categories": [
-                    cat.get("subCategory") for cat in product_data.get("onlineHeirs", [])
-                ],
-                "image_urls": [ 
-                    f"https://shop.coles.com.au/{image.get("full", {}).get("path")}" for image in product_data.get("images", [])
-                ],
-            }
+            details = product_data
 
             current_price = product.price
             if product_data.get("price", {}).get("amountRelevantDisplay"):
@@ -148,7 +130,7 @@ class ColesScraper(Scraper):
             return ProductInfo(
                 store_product_id=product.store_product_id,
                 store=product.store,
-                product_name=product_data.get("name", product.product_name),
+                product_name=product.product_name,
                 price=current_price,
                 details=details,
             )
@@ -180,4 +162,7 @@ class ColesScraper(Scraper):
 if __name__ == "__main__":
     scraper = ColesScraper()
     products = scraper.scrape_category()
-    print(products)
+    if products:
+        detailed_info = scraper.scrape_product(products[0])
+        log(f"Detailed info for {detailed_info.product_name}: {
+            detailed_info.price}")
