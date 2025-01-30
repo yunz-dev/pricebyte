@@ -1,33 +1,30 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Build artifacts
+/build/
+.gradle/
+*.jar
+*.war
+*.ear
+target/ # If you also use Maven sometimes or have mixed projects
 
-### STS ###
-.apt_generated
+# IDE specific files
+.idea/ # IntelliJ IDEA
+.vscode/ # VS Code
+.settings/ # Eclipse
 .classpath
-.factorypath
 .project
-.settings
-.springBeans
-.sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# Operating System files
+.DS_Store
+Thumbs.db
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Log files
+*.log
 
-### VS Code ###
-.vscode/
+# Virtual machine crash logs
+hs_err_pid*
+
+# Gradle wrapper files (optional, but commonly ignored)
+# !gradle-wrapper.jar # Uncomment to include the wrapper JAR if desired
+gradle-wrapper.jar
+gradlew
+gradlew.bat
