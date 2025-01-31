@@ -1,12 +1,12 @@
 {
   description = "A Nix-flake-based Java development environment";
 
-  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz";
+  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1";
 
   outputs =
-    { self, nixpkgs }:
+    inputs:
     let
-      javaVersion = 21; # Change this value to update the whole stack
+      javaVersion = 23; # Change this value to update the whole stack
 
       supportedSystems = [
         "x86_64-linux"
@@ -16,12 +16,12 @@
       ];
       forEachSupportedSystem =
         f:
-        nixpkgs.lib.genAttrs supportedSystems (
+        inputs.nixpkgs.lib.genAttrs supportedSystems (
           system:
           f {
-            pkgs = import nixpkgs {
+            pkgs = import inputs.nixpkgs {
               inherit system;
-              overlays = [ self.overlays.default ];
+              overlays = [ inputs.self.overlays.default ];
             };
           }
         );
@@ -33,6 +33,7 @@
           jdk = prev."jdk${toString javaVersion}";
         in
         {
+          inherit jdk;
           maven = prev.maven.override { jdk_headless = jdk; };
           gradle = prev.gradle.override { java = jdk; };
           lombok = prev.lombok.override { inherit jdk; };
@@ -45,15 +46,11 @@
             packages = with pkgs; [
               gcc
               gradle
-              jdk
+              jdk24
               maven
               ncurses
               patchelf
               zlib
-              nodejs
-              nodePackages.typescript
-              nodePackages.typescript-language-server
-
             ];
 
             shellHook =
