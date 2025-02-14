@@ -6,6 +6,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import PriceHistory from "@/components/priceHistory";
 
 interface ProductPageProps {
   params: {
@@ -19,8 +20,8 @@ interface StoreProduct {
   standardPrice: number;
   productUrl: string;
   priceHistory: {
-    start_date: string;
-    end_date: string;
+    startDate: string;
+    endDate: string;
     price: number;
   }[];
 }
@@ -77,11 +78,11 @@ export default function Product({ params }: ProductPageProps) {
         "standardPrice": 3.5,
         "productUrl": "https://www.woolworths.com.au/shop/productdetails/38121",
         "priceHistory": [
-          { "start_date": "2024-04-05T00:00:00.000Z", "end_date": "2024-04-18T00:00:00.000Z", "price": 2.99 },
-          { "start_date": "2024-04-19T00:00:00.000Z", "end_date": "2024-05-05T00:00:00.000Z", "price": 2.70 },
-          { "start_date": "2024-05-06T00:00:00.000Z", "end_date": "2024-05-25T00:00:00.000Z", "price": 3.05 },
-          { "start_date": "2024-05-26T00:00:00.000Z", "end_date": "2024-06-10T00:00:00.000Z", "price": 2.55 },
-          { "start_date": "2024-06-11T00:00:00.000Z", "end_date": "2024-06-30T00:00:00.000Z", "price": 3.50 }
+          { "startDate": "2024-04-05T00:00:00.000Z", "endDate": "2024-04-18T00:00:00.000Z", "price": 2.99 },
+          { "startDate": "2024-04-19T00:00:00.000Z", "endDate": "2024-05-05T00:00:00.000Z", "price": 2.70 },
+          { "startDate": "2024-05-06T00:00:00.000Z", "endDate": "2024-05-25T00:00:00.000Z", "price": 3.05 },
+          { "startDate": "2024-05-26T00:00:00.000Z", "endDate": "2024-06-10T00:00:00.000Z", "price": 2.55 },
+          { "startDate": "2024-06-11T00:00:00.000Z", "endDate": "2024-06-30T00:00:00.000Z", "price": 3.50 }
         ]
       },
       {
@@ -90,11 +91,11 @@ export default function Product({ params }: ProductPageProps) {
         "standardPrice": 3.8,
         "productUrl": "https://www.coles.com.au/product/coca-cola-soft-drink-coke-2l-191736",
         "priceHistory": [
-          { "start_date": "2024-01-01T00:00:00.000Z", "end_date": "2024-01-15T00:00:00.000Z", "price": 2.50 },
-          { "start_date": "2024-01-16T00:00:00.000Z", "end_date": "2024-02-10T00:00:00.000Z", "price": 2.25 },
-          { "start_date": "2024-02-11T00:00:00.000Z", "end_date": "2024-03-05T00:00:00.000Z", "price": 2.75 },
-          { "start_date": "2024-03-06T00:00:00.000Z", "end_date": "2024-03-20T00:00:00.000Z", "price": 3.00 },
-          { "start_date": "2024-03-21T00:00:00.000Z", "end_date": "2024-04-15T00:00:00.000Z", "price": 3.80 }
+          { "startDate": "2024-01-01T00:00:00.000Z", "endDate": "2024-01-15T00:00:00.000Z", "price": 2.50 },
+          { "startDate": "2024-01-16T00:00:00.000Z", "endDate": "2024-02-10T00:00:00.000Z", "price": 2.25 },
+          { "startDate": "2024-02-11T00:00:00.000Z", "endDate": "2024-03-05T00:00:00.000Z", "price": 2.75 },
+          { "startDate": "2024-03-06T00:00:00.000Z", "endDate": "2024-03-20T00:00:00.000Z", "price": 3.00 },
+          { "startDate": "2024-03-21T00:00:00.000Z", "endDate": "2024-04-15T00:00:00.000Z", "price": 3.80 }
         ]
       },
       {
@@ -103,11 +104,11 @@ export default function Product({ params }: ProductPageProps) {
         "standardPrice": 3.85,
         "productUrl": "https://www.igashop.com.au/product/coca-cola-classic-soft-drink-bottle-14570",
         "priceHistory": [
-          { "start_date": "2024-04-05T00:00:00.000Z", "end_date": "2024-04-18T00:00:00.000Z", "price": 2.99 },
-          { "start_date": "2024-04-19T00:00:00.000Z", "end_date": "2024-05-05T00:00:00.000Z", "price": 2.70 },
-          { "start_date": "2024-05-06T00:00:00.000Z", "end_date": "2024-05-25T00:00:00.000Z", "price": 3.05 },
-          { "start_date": "2024-05-26T00:00:00.000Z", "end_date": "2024-06-10T00:00:00.000Z", "price": 2.55 },
-          { "start_date": "2024-06-11T00:00:00.000Z", "end_date": "2024-06-30T00:00:00.000Z", "price": 3.85 }
+          { "startDate": "2024-04-05T00:00:00.000Z", "endDate": "2024-04-18T00:00:00.000Z", "price": 2.99 },
+          { "startDate": "2024-04-19T00:00:00.000Z", "endDate": "2024-05-05T00:00:00.000Z", "price": 2.70 },
+          { "startDate": "2024-05-06T00:00:00.000Z", "endDate": "2024-05-25T00:00:00.000Z", "price": 3.05 },
+          { "startDate": "2024-05-26T00:00:00.000Z", "endDate": "2024-06-10T00:00:00.000Z", "price": 2.55 },
+          { "startDate": "2024-06-11T00:00:00.000Z", "endDate": "2024-06-30T00:00:00.000Z", "price": 3.85 }
         ]
       }
     ]
@@ -135,7 +136,7 @@ export default function Product({ params }: ProductPageProps) {
           </div>
           <div className="flex flex-col gap-3">
             <CardHeader>
-              <div className="flex flex-row items-center gap-2">
+              <div className="flex flex-row items-center gap-2 mb-5">
                 {productData.storeProducts.map((storeProduct, index) => (
                   <div
                     key={index}
@@ -148,7 +149,7 @@ export default function Product({ params }: ProductPageProps) {
                         : 'transition-transform hover:bg-gray-200 hover:-translate-y-1'
                       }
                     `}>
-                    <span>{storeProduct.store}</span>
+                    <span>(${storeProduct.standardPrice.toFixed(2)}) {storeProduct.store}</span>
                     {storeProduct.standardPrice === minPrice && 
                       <Image src="/Gold Medal.svg" alt="Medal" width={20} height={20}/>
                     }
@@ -175,13 +176,7 @@ export default function Product({ params }: ProductPageProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-64 flex items-center justify-center text-muted-foreground">
-                <div className="text-center">
-                  <TrendingDown className="h-12 w-12 mx-auto mb-4 text-primary" />
-                  <p className="text-lg font-medium">Price tracking chart would appear here</p>
-                  <p className="text-sm">Historical price data and trends over time</p>
-                </div>
-              </div>
+              <PriceHistory params={{ priceHistory: currStoreProduct.priceHistory }} />
             </CardContent>
           </Card>
 
