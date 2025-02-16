@@ -1,5 +1,9 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
+
+/**
+ * Interface of the props passed into PriceHistory
+ */ 
 interface PriceHistoryProps {
   params: {
     priceHistory: {
@@ -9,12 +13,17 @@ interface PriceHistoryProps {
     }[];
   }
 }
+
+/**
+ * Renders an interactive line chart showing the price history of a product over time.
+ */
 export default function PriceHistory({ params }: PriceHistoryProps) {
   
+  // Chart data array to hold date points and prices
   const chartData: any[] = [];
 
-  //
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  // Label that pops up on price history hover
+  const HoverLabel = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       const price = payload[0].value;
       return (
@@ -24,13 +33,13 @@ export default function PriceHistory({ params }: PriceHistoryProps) {
         </div>
       );
     }
-    return null;
   };
   
+  // Data logic to create chartData array
   params.priceHistory.forEach(entry => {
 
-    let currentDateVar = new Date(entry.startDate);
-    let endDateVar = new Date(entry.endDate)
+    const currentDateVar = new Date(entry.startDate);
+    const endDateVar = new Date(entry.endDate)
 
     while (currentDateVar <= endDateVar) {
       chartData.push({
@@ -52,12 +61,12 @@ export default function PriceHistory({ params }: PriceHistoryProps) {
               type="number"
               domain={['auto', 'auto']}
               scale="time"
-              tickFormatter={(unixTime) => new Date(unixTime).toLocaleDateString('en-AU')}
+              tickFormatter={(date) => new Date(date).toLocaleDateString('en-AU')}
             />
             <YAxis
               tickFormatter={(price) => `$${price.toFixed(2)}`}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<HoverLabel />} />
             <Line
               type="stepAfter"
               dataKey="price"
