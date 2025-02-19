@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -8,10 +8,31 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import PriceHistory from "@/components/priceHistory";
 
+async function getProduct(id: string): Promise<Product | null> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/products/${id}`, {
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error('Failed to fetch product');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    throw error;
+  }
+}
+
 interface ProductPageProps {
-  params: {
-    productId: number;
-  };
+  params: Promise<{
+    productId: string;
+  }>;
 }
 
 interface StoreProduct {
@@ -43,83 +64,86 @@ interface Product {
 }
 
 export default function Product({ params }: ProductPageProps) {
+  const [productData, setProductData] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // const response = await fetch(`http://localhost:8080/store-product/${params.productId}`);
-  // if (!response.ok) {
-  //   console.log("Error loading product data")
-  // }
-  // const productData: ProductData = await response.json();
-
-  const productData: Product = {
-    "productId": 32102,
-    "name": "Coca-Cola Soft Drink Coke | 2L",
-    "brand": "Coca-Cola",
-    "category": "Drinks",
-    "size": 2,
-    "unit": "L",
-    "imageUrl": "https://shop.coles.com.au/wcsstore/Coles-CAS/images/1/9/1/191736-zm.jpg",
-    "description": "Nothing beats the taste of Coca-Cola Classic. It's the perfect companion whether you are on the go, relaxing at home, enjoying with friends or as a drink with your meal. Refresh yourself with the authentic Coke taste. Designed to go with everything, the taste of Classic Coca-Cola has remained unchanged for more than 130 years. Coca-Cola soft drink is available in cans, mini cans, single serve and sharing size bottles as well as multipacks.",
-    "nutrition": {
-      "perServing": { 'Energy (Cal)': '187 Cal', 'Energy (kJ)': '780 kJ', 'Protein': '7.35 g',
-         'Carbohydrate': '1.05 g', 'Fat - Saturated': '1.23 g', 'Fat - Transfat': '0.03 g',
-         'Sugars - Total': '0.81 g', 'Sodium': '0.6 mg', 'Dietary Fibre': '3.48 g',
-         'Fat - Total': '16.5 g'
-      },
-      "per100g": { 'Energy (Cal)': '622 Cal', 'Energy (kJ)': '2600 kJ', 'Protein': '24.5 g',
-         'Carbohydrate': '3.5 g', 'Fat - Saturated': '4.1 g', 'Fat - Transfat': '0.1 g',
-         'Sugars - Total': '2.7 g', 'Sodium': '2 mg', 'Dietary Fibre': '11.6 g',
-         'Fat - Total': '54.9 g' 
-      },
-    },
-    "storeProducts": [
-      {
-        "storeProductId": 38121,
-        "store": "Woolworths",
-        "standardPrice": 3.5,
-        "productUrl": "https://www.woolworths.com.au/shop/productdetails/38121",
-        "priceHistory": [
-          { "startDate": "2024-04-05T00:00:00.000Z", "endDate": "2024-04-18T00:00:00.000Z", "price": 2.99 },
-          { "startDate": "2024-04-19T00:00:00.000Z", "endDate": "2024-05-05T00:00:00.000Z", "price": 2.70 },
-          { "startDate": "2024-05-06T00:00:00.000Z", "endDate": "2024-05-25T00:00:00.000Z", "price": 3.05 },
-          { "startDate": "2024-05-26T00:00:00.000Z", "endDate": "2024-06-10T00:00:00.000Z", "price": 2.55 },
-          { "startDate": "2024-06-11T00:00:00.000Z", "endDate": "2024-06-30T00:00:00.000Z", "price": 3.50 }
-        ]
-      },
-      {
-        "storeProductId": 191736,
-        "store": "Coles",
-        "standardPrice": 3.8,
-        "productUrl": "https://www.coles.com.au/product/coca-cola-soft-drink-coke-2l-191736",
-        "priceHistory": [
-          { "startDate": "2024-01-01T00:00:00.000Z", "endDate": "2024-01-15T00:00:00.000Z", "price": 2.50 },
-          { "startDate": "2024-01-16T00:00:00.000Z", "endDate": "2024-02-10T00:00:00.000Z", "price": 2.25 },
-          { "startDate": "2024-02-11T00:00:00.000Z", "endDate": "2024-03-05T00:00:00.000Z", "price": 2.75 },
-          { "startDate": "2024-03-06T00:00:00.000Z", "endDate": "2024-03-20T00:00:00.000Z", "price": 3.00 },
-          { "startDate": "2024-03-21T00:00:00.000Z", "endDate": "2024-04-15T00:00:00.000Z", "price": 3.80 }
-        ]
-      },
-      {
-        "storeProductId": 14570,
-        "store": "IGA",
-        "standardPrice": 3.85,
-        "productUrl": "https://www.igashop.com.au/product/coca-cola-classic-soft-drink-bottle-14570",
-        "priceHistory": [
-          { "startDate": "2024-04-05T00:00:00.000Z", "endDate": "2024-04-18T00:00:00.000Z", "price": 2.99 },
-          { "startDate": "2024-04-19T00:00:00.000Z", "endDate": "2024-05-05T00:00:00.000Z", "price": 2.70 },
-          { "startDate": "2024-05-06T00:00:00.000Z", "endDate": "2024-05-25T00:00:00.000Z", "price": 3.05 },
-          { "startDate": "2024-05-26T00:00:00.000Z", "endDate": "2024-06-10T00:00:00.000Z", "price": 2.55 },
-          { "startDate": "2024-06-11T00:00:00.000Z", "endDate": "2024-06-30T00:00:00.000Z", "price": 3.85 }
-        ]
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const resolvedParams = await params;
+        const data = await getProduct(resolvedParams.productId);
+        console.log(data);
+        if (data) {
+          setProductData(data);
+        } else {
+          setError('Product not found');
+        }
+      } catch (err) {
+        setError('Failed to load product');
+        console.error('Error fetching product:', err);
+      } finally {
+        setLoading(false);
       }
-    ]
+    };
+
+    fetchProduct();
+  }, [params]);
+
+
+
+  const [currStoreProduct, setCurrStoreProduct] = useState<StoreProduct | null>(null);
+
+  useEffect(() => {
+    if (productData && productData.storeProducts.length > 0) {
+      setCurrStoreProduct(productData.storeProducts[0]);
+    }
+  }, [productData]);
+
+  if (loading) {
+    return (
+      <div className="w-full bg-gray-300">
+        <Header />
+        <div className="flex flex-col items-center justify-center w-full min-h-svh px-20 mt-10">
+          <div className="text-xl">Loading...</div>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
-  const [currStoreProduct, setCurrStoreProduct] = useState<StoreProduct>(productData["storeProducts"][0])
+  if (error || !productData) {
+    return (
+      <div className="w-full bg-gray-300">
+        <Header />
+        <div className="flex flex-col items-center justify-center w-full min-h-svh px-20 mt-10">
+          <div className="text-xl text-red-500">{error || 'Product not found'}</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!currStoreProduct) {
+    return (
+      <div className="w-full bg-gray-300">
+        <Header />
+        <div className="flex flex-col items-center justify-center w-full min-h-svh px-20 mt-10">
+          <div className="text-xl">No store products available</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   const minPrice: number = Math.min(...productData.storeProducts.map(storeProduct => storeProduct.standardPrice));
 
   const handleStoreClick = (storeProduct: StoreProduct) => {
     if (currStoreProduct && currStoreProduct.store === storeProduct.store) {
-      window.open(storeProduct.productUrl, '_blank');
+      if (storeProduct.productUrl) {
+        window.open(storeProduct.productUrl, '_blank');
+      }
     } else {
       setCurrStoreProduct(storeProduct);
     }
@@ -127,12 +151,18 @@ export default function Product({ params }: ProductPageProps) {
 
   return (
     <div className="w-full bg-gray-300">
-      <Header/>
+      <Header />
       <div className="flex flex-col items-center justify-center w-full min-h-svh px-20 mt-10">
         <Card className="grid grid-cols-2 w-full h-full mb-10">
           {/* Product Image */}
           <div className="flex justify-center items-center" >
-            <Image src={productData.imageUrl} alt={productData.name} width={500} height={500}/>
+            {productData.imageUrl ? (
+              <Image src={productData.imageUrl} alt={productData.name} width={500} height={500} />
+            ) : (
+              <div className="w-[500px] h-[500px] bg-gray-200 flex items-center justify-center rounded-lg">
+                <span className="text-gray-500">No image available</span>
+              </div>
+            )}
           </div>
           <div className="flex flex-col gap-3">
             {/* Store Options */}
@@ -151,8 +181,8 @@ export default function Product({ params }: ProductPageProps) {
                       }
                     `}>
                     <span>(${storeProduct.standardPrice.toFixed(2)}) {storeProduct.store}</span>
-                    {storeProduct.standardPrice === minPrice && 
-                      <Image src="/Gold Medal.svg" alt="Medal" width={20} height={20}/>
+                    {storeProduct.standardPrice === minPrice &&
+                      <Image src="/Gold Medal.svg" alt="Medal" width={20} height={20} />
                     }
                   </div>
                 ))}
