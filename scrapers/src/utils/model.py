@@ -51,6 +51,13 @@ class PriceUpdates(BaseModel):
     product_name: str
     price: float
 
+    def to_api_format(self):
+        return {
+            "store": self.store,
+            "store_product_id": self.store_product_id,
+            "new_price": self.price,
+        }
+
 
 # we could inherirt here but i hate inheritence
 class ProductInfo(BaseModel):
@@ -59,6 +66,15 @@ class ProductInfo(BaseModel):
     product_name: str
     price: float
     details: dict
+
+    def to_api_format(self):
+        return {
+            "store": self.store,
+            "id": self.store_product_id,
+            "name": self.product_name,
+            "price": self.price,
+            "details": self.details,
+        }
 
 
 class Scraper(ABC):
@@ -84,7 +100,7 @@ class Scraper(ABC):
     @abstractmethod
     def get_store_name(self) -> str:
         pass
-    
+
 
 class ColesProductV1(BaseModel):
     store: str

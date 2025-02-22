@@ -1,17 +1,22 @@
+from typing import List
+
+import requests
+from config import is_mock, is_production, parse_and_set_env
 from database import MainDatabase, MockDatabase
+from log import detailed_log, log
 from mockscraper import MockScraperAldi
-from scrapers.aldiV2 import AldiScraper
-from scrapers.colesV2 import ColesScraper
 
 # still not working i fix later ->>>>
 # from scrapers.wooliesV2 import WoolworthsScraper
 from utils.model import PriceUpdates, ProductInfo, Scraper
-from typing import List
-from config import is_production, parse_and_set_env, is_mock
-from log import log, detailed_log
+
+from scrapers.aldiV2 import AldiScraper
+from scrapers.colesV2 import ColesScraper
+import os
 
 main_db = MainDatabase()
 test_db = MockDatabase()
+py_etl_url = os.environ["py_etl_url"]
 
 
 def main():
@@ -23,8 +28,8 @@ def main():
         ]
         if is_mock()
         else [
+            ColesScraper(),
             AldiScraper(),
-            ColesScraper()
             # Add real scrapers here
         ]
     )
@@ -80,8 +85,7 @@ def product_price_check(scraper: Scraper, product_list: List[PriceUpdates]) -> i
 
     prices_changed = 0
     for product in product_list:
-        store, id, price = (
-            product.store, product.store_product_id, product.price)
+        store, id, price = (product.store, product.store_product_id, product.price)
         if main_db.check_price(store, id, price):
             update_price_remote(product)
             prices_changed += 1
@@ -101,8 +105,13 @@ def send_to_data_processer(data: ProductInfo):
         data.details,
     )
     if is_production():
-        send_to_scala(data)
-        log(f"successfully sent product: {store}:{id} to scala")
+        res = send_to_etl_v0(data)
+        if res.ok:
+            log(f"successfully sent product: {store}:{id} to etl")
+        else:
+            log(f"unsuccessfully sent product: {store}:{id} to etl")
+            append_to_file(f"{res}")
+
     else:
         test_db.upsert_complex_product(store, id, name, price, details)
         log(f"successfully sent product: {store}:{id} to MockDB")
@@ -116,11 +125,23 @@ def update_price_remote(data: PriceUpdates):
         data.price,
     )
     if is_production():
-        send_to_spring(data)
-        log(f"successfully updated product price for: {store}:{id} via spring")
+        res = update_remote_v0(data)
+        if res.ok:
+            log(f"successfully sent product: {store}:{id} to update price")
+        else:
+            log(f"unsuccessfully sent product: {store}:{id} to update price")
+            append_to_file(f"{res}")
     else:
         log(f"successfully updated product price for: {store}:{id} via MockDB")
         test_db.upsert_simple_product(store, id, name, price)
+
+
+def update_remote_v0(data) -> requests.Response:
+    return update_price(data)
+
+
+def send_to_etl_v0(data) -> requests.Response:
+    return create_product(data)
 
 
 def send_to_spring(data) -> bool:
@@ -129,6 +150,52 @@ def send_to_spring(data) -> bool:
 
 def send_to_scala(data) -> bool:
     raise NotImplementedError
+
+
+def append_to_file(content, filename="./log.txt"):
+    """Append content to a file, creating it if it doesn't exist."""
+    with open(filename, "a") as file:
+        file.write(content + "\n")
+
+
+def create_product(
+    product_info: ProductInfo, base_url: str = "http://localhost:8000"
+) -> requests.Response:
+    payload = {
+        "store": product_info.store.value
+        if hasattr(product_info.store, "value")
+        else str(product_info.store),
+        "id": str(product_info.store_product_id),
+        "name": product_info.product_name,
+        "price": product_info.price,
+        "details": product_info.details,
+    }
+
+    headers = {"accept": "application/json", "Content-Type": "application/json"}
+
+    response = requests.post(f"{base_url}/api/products", json=payload, headers=headers)
+
+    return response
+
+
+def update_price(
+    price_update: PriceUpdates, base_url: str = "http://localhost:8000"
+) -> requests.Response:
+    payload = {
+        "store": price_update.store.value
+        if hasattr(price_update.store, "value")
+        else str(price_update.store),
+        "store_product_id": str(price_update.store_product_id),
+        "new_price": price_update.price,
+    }
+
+    headers = {"accept": "application/json", "Content-Type": "application/json"}
+
+    response = requests.post(
+        f"{base_url}/api/price-update", json=payload, headers=headers
+    )
+
+    return response
 
 
 if __name__ == "__main__":
