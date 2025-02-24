@@ -7,7 +7,7 @@ import re
 
 
 class ProductMatcher:
-    def __init__(self, db: Session, threshold: float = SIMILARITY_THRESHOLD):
+    def __init__(self, db: Session, threshold: float = 0.91):
         self.db = db
         self.threshold = threshold
 
@@ -33,6 +33,28 @@ class ProductMatcher:
 
         return best_match
 
+    def search_products_by_name(self, search_name: str, limit: int = 10) -> List[Tuple[Product, float]]:
+        """Search for products by name similarity, returning top matches with scores"""
+        candidates = self._get_candidates()
+
+        if not candidates:
+            return []
+
+        scored_products = []
+        search_name_clean = self._clean_text(search_name)
+
+        for candidate in candidates:
+            candidate_name_clean = self._clean_text(candidate.name)
+            
+            # Use token_sort_ratio for name matching (same as in matching logic)
+            name_similarity = fuzz.token_sort_ratio(search_name_clean, candidate_name_clean) / 100.0
+            
+            scored_products.append((candidate, name_similarity))
+
+        # Sort by similarity score descending and return top matches
+        scored_products.sort(key=lambda x: x[1], reverse=True)
+        return scored_products[:limit]
+
     def _get_candidates(self) -> List[Product]:
         return self.db.query(Product).all()
 
@@ -44,10 +66,10 @@ class ProductMatcher:
 
         name_similarity = fuzz.token_sort_ratio(name1_clean, name2_clean) / 100.0
 
-        # Adjusted weights to include category
-        name_weight = 0.4
+        # Optimized weights - size matters for exact products
+        name_weight = 0.5
         brand_weight = 0.25
-        category_weight = 0.15
+        category_weight = 0.05
         size_weight = 0.2
 
         # Brand fuzzy matching
@@ -88,11 +110,11 @@ class ProductMatcher:
 
         text = text.lower()
 
+        # Remove size units first
         text = re.sub(r"\b\d+g\b|\b\d+kg\b|\b\d+ml\b|\b\d+l\b", "", text)
 
-        text = re.sub(r"[^\w\s]", " ", text)
-
-        text = re.sub(r"\s+", " ", text).strip()
+        # Remove ALL non-alphanumeric characters (spaces, punctuation, etc.)
+        text = re.sub(r"[^a-z0-9]", "", text)
 
         return text
 
@@ -100,10 +122,9 @@ class ProductMatcher:
         if not brand:
             return ""
         
-        # Remove common separators and normalize
+        # Remove ALL non-alphanumeric characters (spaces, punctuation, dashes, etc.)
         brand = brand.lower()
-        brand = re.sub(r"[^\w\s]", "", brand)  # Remove punctuation
-        brand = re.sub(r"\s+", "", brand)  # Remove all spaces
+        brand = re.sub(r"[^a-z0-9]", "", brand)
         
         return brand
 

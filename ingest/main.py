@@ -4,7 +4,7 @@ from datetime import date, datetime
 from typing import List
 
 from models import get_db, create_tables, Product, StoreProduct, PriceHistory
-from schemas import ProductCreateRequest, ProductResponse, ProductInfo, StoreProductInfo, ProductWithStores, StoreProductWithHistory, PriceHistoryInfo, PriceUpdateRequest, PriceUpdateResponse
+from schemas import ProductCreateRequest, ProductResponse, ProductInfo, StoreProductInfo, ProductWithStores, StoreProductWithHistory, PriceHistoryInfo, PriceUpdateRequest, PriceUpdateResponse, ProductSearchResult, ProductSearchResponse
 from processors import ProcessorFactory
 from matcher import ProductMatcher
 from config import API_TITLE, API_DESCRIPTION, API_VERSION
@@ -167,6 +167,81 @@ async def get_products(
             ))
     
     return result
+
+@app.get("/api/products/search", response_model=ProductSearchResponse)
+async def search_products(
+    q: str,
+    offset: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    """
+    Search for products by name similarity with pagination.
+    
+    Args:
+        q: Search query (product name)
+        offset: Number of results to skip (default: 0)
+        limit: Maximum number of results to return (default: 10, max: 50)
+        
+    Returns:
+        Paginated list of products ranked by name similarity with scores
+    """
+    if not q or not q.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Search query cannot be empty"
+        )
+    
+    # Validate pagination parameters
+    if offset < 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Offset cannot be negative"
+        )
+    
+    if limit <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Limit must be greater than 0"
+        )
+    
+    # Limit the results to a reasonable number
+    limit = min(limit, 50)
+    
+    matcher = ProductMatcher(db)
+    # Get more results than needed to handle pagination properly
+    max_results = offset + limit + 1  # +1 to check if there are more results
+    search_results = matcher.search_products_by_name(q.strip(), max_results)
+    
+    total_count = len(search_results)
+    
+    # Apply pagination
+    paginated_results = search_results[offset:offset + limit]
+    has_next = total_count > offset + limit
+    
+    results = []
+    for product, similarity_score in paginated_results:
+        results.append(ProductSearchResult(
+            id=product.id,
+            name=product.name,
+            brand=product.brand,
+            category=product.category,
+            size=product.size,
+            unit=product.unit,
+            image_url=product.image_url,
+            description=product.description,
+            similarity_score=round(similarity_score, 3),
+            created_at=product.created_at,
+            updated_at=product.updated_at
+        ))
+    
+    return ProductSearchResponse(
+        results=results,
+        total_count=total_count,
+        offset=offset,
+        limit=limit,
+        has_next=has_next
+    )
 
 @app.get("/api/products/{product_id}", response_model=ProductWithStores)
 async def get_product_by_id(product_id: int, db: Session = Depends(get_db)):

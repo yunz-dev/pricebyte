@@ -133,3 +133,23 @@ class PriceUpdateResponse(BaseModel):
     old_price: float
     new_price: float
     price_history_id: int
+
+class ProductSearchResult(BaseModel):
+    id: int
+    name: str
+    brand: Optional[str] = None
+    category: Optional[str] = None
+    size: Optional[str] = None
+    unit: Optional[str] = None
+    image_url: Optional[str] = None
+    description: Optional[str] = None
+    similarity_score: float
+    created_at: datetime
+    updated_at: datetime
+
+class ProductSearchResponse(BaseModel):
+    results: List[ProductSearchResult]
+    total_count: int
+    offset: int
+    limit: int
+    has_next: bool
