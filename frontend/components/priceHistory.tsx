@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 
 /**
@@ -27,59 +27,98 @@ export default function PriceHistory({ params }: PriceHistoryProps) {
     if (active && payload && payload.length) {
       const price = payload[0].value;
       return (
-        <div className="p-2 bg-gray-800 text-white rounded-md shadow-lg">
-          <p className="font-bold">{`Price: $${price.toFixed(2)}`}</p>
-          <p className="text-sm">{`Date: ${new Date(label).toLocaleDateString('en-AU')}`}</p>
+        <div className="p-3 bg-white border border-gray-200 rounded-lg shadow-xl">
+          <p className="font-bold text-gray-900">{`$${price.toFixed(2)}`}</p>
+          <p className="text-sm text-gray-600">{new Date(label).toLocaleDateString('en-AU', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+          })}</p>
         </div>
       );
     }
   };
   
-  // Data logic to create chartData array
+  // Data logic to create chartData array - simplified approach
   params.priceHistory.forEach(entry => {
-
-    const currentDateVar = new Date(entry.startDate);
-    const endDateVar = new Date(entry.endDate)
-
-    while (currentDateVar <= endDateVar) {
+    const startDate = new Date(entry.startDate);
+    const endDate = new Date(entry.endDate);
+    
+    // Add start point
+    chartData.push({
+      date: startDate.getTime(),
+      price: entry.price,
+    });
+    
+    // Add end point only if it's different from start
+    if (endDate.getTime() !== startDate.getTime()) {
       chartData.push({
-        date: currentDateVar.getTime(),
+        date: endDate.getTime(),
         price: entry.price,
       });
-      currentDateVar.setDate(currentDateVar.getDate() + 1);
     }
   });
-  chartData.sort((a, b) => a.date - b.date);
+  
+  // Remove duplicates and sort
+  const uniqueData = chartData.reduce((acc, current) => {
+    const existing = acc.find(item => item.date === current.date);
+    if (!existing) {
+      acc.push(current);
+    }
+    return acc;
+  }, [] as any[]);
+  
+  uniqueData.sort((a, b) => a.date - b.date);
+
+  const finalData = uniqueData.length > 0 ? uniqueData : chartData;
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-4xl">
-      {chartData.length > 0 ? (
-        <ResponsiveContainer width="100%" height={400}>
-          <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+    <div className="w-full">
+      {finalData.length > 0 ? (
+        <ResponsiveContainer width="100%" height={350}>
+          <LineChart data={finalData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
             <XAxis
               dataKey="date"
               type="number"
-              domain={['auto', 'auto']}
+              domain={['dataMin', 'dataMax']}
               scale="time"
-              tickFormatter={(date) => new Date(date).toLocaleDateString('en-AU')}
+              tickFormatter={(date) => new Date(date).toLocaleDateString('en-AU', { 
+                month: 'short', 
+                year: '2-digit' 
+              })}
+              tick={{ fontSize: 12 }}
+              axisLine={{ stroke: '#e5e7eb' }}
+              tickLine={{ stroke: '#e5e7eb' }}
             />
             <YAxis
+              domain={['dataMin - 0.5', 'dataMax + 0.5']}
               tickFormatter={(price) => `$${price.toFixed(2)}`}
+              tick={{ fontSize: 12 }}
+              axisLine={{ stroke: '#e5e7eb' }}
+              tickLine={{ stroke: '#e5e7eb' }}
             />
             <Tooltip content={<HoverLabel />} />
             <Line
-              type="stepAfter"
+              type="monotone"
               dataKey="price"
-              stroke="#4299e1"
-              strokeWidth={2}
+              stroke="#3b82f6"
+              strokeWidth={3}
               dot={false}
-              activeDot={{ r: 8, stroke: '#4299e1', fill: '#fff' }}
+              activeDot={{ 
+                r: 6, 
+                stroke: '#3b82f6', 
+                strokeWidth: 2,
+                fill: '#ffffff',
+                style: { filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }
+              }}
             />
           </LineChart>
         </ResponsiveContainer>
       ) : (
         <div className="text-center text-gray-500 py-20">
-          Price history for this product is empty.
+          <div className="text-lg font-medium">No price history available</div>
+          <div className="text-sm mt-2">Price data will appear here when available</div>
         </div>
       )}
     </div>

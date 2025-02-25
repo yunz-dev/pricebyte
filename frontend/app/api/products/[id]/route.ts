@@ -33,6 +33,7 @@ interface Product {
   unit: string;
   imageUrl: string;
   description: string;
+  longDescription?: string;
   nutrition: NutritionInfo;
   storeProducts: StoreProduct[];
 }
@@ -56,6 +57,7 @@ interface ApiStoreProduct {
     brand: string;
     category: string;
     description: string;
+    longDescription?: string;
     weight: string;
     ingredients: string;
     nutrition_facts: Record<string, any>;
@@ -245,27 +247,46 @@ function convertPriceHistory(apiPriceHistory: ApiPriceHistory[]): PriceHistoryEn
     const basePrice = convertedData[0].price;
     const startYear = 2022;
     const endYear = 2024;
+    let currentPrice = basePrice * 0.7; // Start at 70% of base price
 
     // Generate monthly entries from 2022 to 2024
     for (let year = startYear; year <= endYear; year++) {
       for (let month = 0; month < 12; month++) {
-        // Calculate total months from start to determine trend
+        // Calculate overall trend (gradual increase over time)
         const monthIndex = (year - startYear) * 12 + month;
         const totalMonths = (endYear - startYear + 1) * 12;
+        const progressRatio = monthIndex / totalMonths;
 
-        // Base trend: gradually increase price over time (start at 70% of base price)
-        const trendMultiplier = 0.7 + (monthIndex / totalMonths) * 0.25; // 0.7 to 0.95
-        let currentPrice = basePrice * trendMultiplier;
+        // Base upward trend (from 70% to 95% of base price)
+        const trendTarget = basePrice * (0.7 + progressRatio * 0.25);
+
+        // Add random variation around the trend
+        const randomVariation = (Math.random() - 0.5) * 0.1; // ±5% random variation
+        let targetPrice = trendTarget * (1 + randomVariation);
+
+        // Smooth transition from current price to target (prevents big jumps)
+        const smoothingFactor = 0.3; // How much to move toward target each month
+        currentPrice = currentPrice * (1 - smoothingFactor) + targetPrice * smoothingFactor;
 
         // Add occasional discount spikes (simulate sales/discounts)
-        // Random chance for discount in certain months (e.g., holiday seasons)
-        const isDiscountMonth = Math.random() < 0.15; // 15% chance
+        const isDiscountMonth = Math.random() < 0.12; // 12% chance
+        let finalPrice = currentPrice;
         if (isDiscountMonth) {
-          currentPrice *= 0.75; // 25% discount
+          const discountAmount = 0.15 + Math.random() * 0.15; // 15-30% discount
+          finalPrice = currentPrice * (1 - discountAmount);
         }
 
+        // Add small random daily fluctuations
+        const dailyVariation = (Math.random() - 0.5) * 0.05; // ±2.5% daily variation
+        finalPrice *= (1 + dailyVariation);
+
         // Round to 2 decimal places
-        currentPrice = Math.round(currentPrice * 100) / 100;
+        finalPrice = Math.round(finalPrice * 100) / 100;
+
+        // Update current price for next iteration (only if not a discount month)
+        if (!isDiscountMonth) {
+          currentPrice = finalPrice;
+        }
 
         const startDate = new Date(year, month, 1);
         const endDate = new Date(year, month + 1, 0); // Last day of current month
@@ -273,7 +294,7 @@ function convertPriceHistory(apiPriceHistory: ApiPriceHistory[]): PriceHistoryEn
         fakeData.push({
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
-          price: currentPrice
+          price: finalPrice
         });
       }
     }
@@ -283,6 +304,74 @@ function convertPriceHistory(apiPriceHistory: ApiPriceHistory[]): PriceHistoryEn
   return [...fakeData, ...convertedData];
 }
 
+function createWoolworthsFromColes(colesProduct: ApiStoreProduct): ApiStoreProduct {
+  // Generate a slightly different price (±5-15% variation)
+  const priceVariation = 0.05 + Math.random() * 0.1; // 5-15%
+  const priceMultiplier = Math.random() > 0.5 ? (1 + priceVariation) : (1 - priceVariation);
+  const woolworthsPrice = Math.round(colesProduct.current_price * priceMultiplier * 100) / 100;
+
+  // Generate a new store product ID
+  const woolworthsId = colesProduct.id + 10000; // Simple offset to avoid conflicts
+
+  return {
+    ...colesProduct,
+    id: woolworthsId,
+    store: 'woolworths',
+    store_name: colesProduct.store_name, // Keep the same store_name as Coles
+    store_product_id: `WW${colesProduct.store_product_id.slice(2)}`, // Replace prefix
+    current_price: woolworthsPrice,
+    // Keep most raw_details the same, but could modify specific fields if needed
+    raw_details: {
+      ...colesProduct.raw_details,
+      // Remove Coles-specific data that might not apply to Woolworths
+      nutrition: undefined, // Remove Coles nutrition format
+      // Keep nutrition_facts if it exists for the generic format
+    },
+    // Generate different price history based on the new price
+    price_history: colesProduct.price_history.map(entry => ({
+      ...entry,
+      price: Math.round(entry.price * priceMultiplier * 100) / 100
+    }))
+  };
+}
+
+function addWoolworthsProductIfColesExists(apiData: ApiProduct): ApiProduct {
+  console.log('Checking for Coles product...');
+  console.log('Available stores:', apiData.store_products.map(sp => sp.store));
+
+  // Check if we have a Coles product
+  const colesProduct = apiData.store_products.find(sp => sp.store.toLowerCase() === 'coles');
+
+  if (colesProduct) {
+    console.log('Found Coles product!');
+
+    // Check if Woolworths already exists
+    const woolworthsExists = apiData.store_products.some(sp => sp.store.toLowerCase() === 'woolworths');
+
+    console.log('Woolworths already exists:', woolworthsExists);
+
+    if (!woolworthsExists) {
+      console.log('Creating Woolworths product from Coles...');
+      // Create Woolworths version from Coles
+      const woolworthsProduct = createWoolworthsFromColes(colesProduct);
+
+      const enhancedData = {
+        ...apiData,
+        store_products: [...apiData.store_products, woolworthsProduct]
+      };
+
+      console.log('Added Woolworths! New store count:', enhancedData.store_products.length);
+      console.log('Updated stores:', enhancedData.store_products.map(sp => sp.store));
+
+      return enhancedData;
+    }
+  } else {
+    console.log('No Coles product found');
+  }
+
+  console.log('Returning original data without changes');
+  return apiData;
+}
 function convertStoreProducts(apiStoreProducts: ApiStoreProduct[]): StoreProduct[] {
   return apiStoreProducts.map(storeProduct => ({
     storeProductId: storeProduct.id,
@@ -295,6 +384,18 @@ function convertStoreProducts(apiStoreProducts: ApiStoreProduct[]): StoreProduct
 
 function capitalizeFirstLetter(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function getLongDescription(apiData: ApiProduct): string | undefined {
+  // Try to get long description from any store product that has it
+  for (const storeProduct of apiData.store_products) {
+    if (storeProduct.raw_details?.longDescription) {
+      return storeProduct.raw_details.longDescription;
+    }
+  }
+
+  // Return undefined if no long description found
+  return undefined;
 }
 
 function getNutritionData(storeProduct: ApiStoreProduct): NutritionInfo {
@@ -350,7 +451,10 @@ export async function GET(
     const apiData: ApiProduct = await response.json();
     console.log('API Data:', apiData);
 
-    const storeProducts = apiData.store_products;
+    // Add Woolworths product if Coles exists but Woolworths doesn't
+    const enhancedApiData = addWoolworthsProductIfColesExists(apiData);
+
+    const storeProducts = enhancedApiData.store_products;
     for (let i = 0; i < storeProducts.length; i++) {
       console.log(`Store Product ${i} (${storeProducts[i].store}):`);
 
@@ -373,7 +477,7 @@ export async function GET(
 
     // Get nutrition data from the first store product that has it
     let nutritionData: NutritionInfo = { perServing: {}, per100g: {} };
-    for (const storeProduct of apiData.store_products) {
+    for (const storeProduct of enhancedApiData.store_products) {
       const nutrition = getNutritionData(storeProduct);
       if (Object.keys(nutrition.perServing).length > 0 || Object.keys(nutrition.per100g).length > 0) {
         nutritionData = nutrition;
@@ -381,18 +485,22 @@ export async function GET(
       }
     }
 
+    // Get long description if available
+    const longDescription = getLongDescription(enhancedApiData);
+
     // Convert API data to Product format
     const product: Product = {
-      productId: apiData.id,
-      name: apiData.name,
-      brand: apiData.brand,
-      category: capitalizeFirstLetter(apiData.category),
-      size: parseSize(apiData.size),
-      unit: apiData.unit,
-      imageUrl: apiData.image_url || '',
-      description: apiData.description,
+      productId: enhancedApiData.id,
+      name: enhancedApiData.name,
+      brand: enhancedApiData.brand,
+      category: capitalizeFirstLetter(enhancedApiData.category),
+      size: parseSize(enhancedApiData.size),
+      unit: enhancedApiData.unit,
+      imageUrl: enhancedApiData.image_url || '',
+      description: enhancedApiData.description,
+      longDescription: longDescription,
       nutrition: nutritionData,
-      storeProducts: convertStoreProducts(apiData.store_products)
+      storeProducts: convertStoreProducts(enhancedApiData.store_products)
     };
 
     return NextResponse.json(product);
