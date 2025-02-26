@@ -22,33 +22,52 @@ export default function Header() {
   };
 
   return (
-    <nav className="w-full bg-white shadow-md px-10 py-4 flex items-center sticky top-0 z-50">
+    <nav className="w-full bg-blue-600 shadow-lg px-6 py-3 grid grid-cols-3 items-center sticky top-0 z-50">
 
       {/* Project Title - Left */}
-      <div className="flex-shrink-0">
-        <Link href="/" className="text-lg font-semibold hover:text-blue-600 transition-colors">
-          Pricebyte
+      <div className="flex justify-start">
+        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+            <ShoppingCart className="w-5 h-5 text-blue-600" />
+          </div>
+          <span className="text-xl font-bold text-white">PriceByte</span>
         </Link>
       </div>
 
       {/* Search Bar - Center */}
-      <div className="flex-1 flex justify-center px-8">
+      <div className="flex justify-center">
         <form onSubmit={handleSearch} className="relative flex items-center max-w-2xl w-full">
           <Search className="absolute left-4 text-gray-400" size={20} />
           <Input 
             type="text" 
-            placeholder="Search products" 
+            placeholder="Search products, recipes & ideas" 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-12 pl-12 pr-6 text-lg border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+            className="w-full h-11 pl-12 pr-6 text-base border-0 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 shadow-sm bg-white"
           />
         </form>
       </div>
 
-      {/* Icons - Right */}
-      <div className="flex items-center gap-5 flex-shrink-0">
-        <User className="text-gray-500 cursor-pointer hover:text-black" size={20} />
-        <ShoppingCart className="text-gray-500 cursor-pointer hover:text-black" size={20} />
+      {/* Navigation Links - Right */}
+      <div className="flex items-center justify-end gap-6">
+        <div className="hidden lg:flex items-center gap-4 text-white text-sm font-medium">
+          <Link href="/" className="hover:text-blue-200 transition-colors whitespace-nowrap">Browse products</Link>
+          <Link href="/" className="hover:text-blue-200 transition-colors whitespace-nowrap">Specials & offers</Link>
+          <Link href="/" className="hover:text-blue-200 transition-colors">Help</Link>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-1 text-white text-sm">
+            <User className="w-5 h-5" />
+            <span className="hidden md:inline whitespace-nowrap">My Account</span>
+          </div>
+          <div className="relative">
+            <ShoppingCart className="w-6 h-6 text-white cursor-pointer hover:text-blue-200 transition-colors" />
+            <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+              0
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Mobile Navigation (Sidebar) */}

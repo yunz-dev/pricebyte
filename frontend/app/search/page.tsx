@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
+import { SearchResultsSkeleton } from '@/components/skeletons';
 
 interface SearchResult {
   id: number;
@@ -84,24 +85,21 @@ export default function SearchPage() {
   const totalPages = searchResults ? Math.ceil(searchResults.total_count / limit) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {query && (
-          <div className="mb-6">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
               Search results for "{query}"
             </h1>
+            <div className="h-1 w-16 bg-blue-600 rounded-full"></div>
           </div>
         )}
 
-        {loading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        )}
+        {loading && <SearchResultsSkeleton />}
 
         {error && (
           <div className="text-center py-12">
@@ -118,9 +116,9 @@ export default function SearchPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
               {searchResults.results.map((product) => (
                 <Link key={product.id} href={`/product/${product.id}`}>
-                  <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardContent className="p-4">
-                      <div className="aspect-square relative mb-4 bg-gray-100 rounded-lg overflow-hidden">
+                  <Card className="h-full hover:shadow-xl hover:scale-105 transition-all duration-200 cursor-pointer border-0 shadow-md">
+                    <CardContent className="p-5">
+                      <div className="aspect-square relative mb-4 bg-gray-50 rounded-xl overflow-hidden">
                         <Image
                           src={product.image_url || '/placeholder-product.jpg'}
                           alt={product.name}
@@ -130,24 +128,24 @@ export default function SearchPage() {
                         />
                       </div>
                       
-                      <div className="space-y-2">
-                        <h3 className="font-semibold text-gray-900 line-clamp-2 text-sm">
+                      <div className="space-y-3">
+                        <h3 className="font-bold text-gray-900 line-clamp-2 text-base leading-tight">
                           {product.name}
                         </h3>
                         
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 font-medium">
                           {product.brand} • {product.size}{product.unit}
                         </p>
                         
-                        <p className="text-xs text-gray-500 line-clamp-2">
+                        <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
                           {product.description}
                         </p>
                         
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        <div className="flex items-center justify-between pt-2">
+                          <span className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-medium">
                             {product.category}
                           </span>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-blue-600 font-semibold">
                             {Math.round(product.similarity_score * 100)}% match
                           </span>
                         </div>
@@ -160,28 +158,29 @@ export default function SearchPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2 bg-white p-6 rounded-xl shadow-sm">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(page - 1)}
                   disabled={page <= 1}
+                  className="border-blue-200 text-blue-600 hover:bg-blue-50"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Previous
                 </Button>
                 
                 <div className="flex items-center gap-2">
-                  {Array.from({ length: Math.min(10, totalPages) }, (_, i) => {
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     let pageNum;
-                    if (totalPages <= 10) {
+                    if (totalPages <= 5) {
                       pageNum = i + 1;
-                    } else if (page <= 5) {
+                    } else if (page <= 3) {
                       pageNum = i + 1;
-                    } else if (page >= totalPages - 4) {
-                      pageNum = totalPages - 9 + i;
+                    } else if (page >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
                     } else {
-                      pageNum = page - 4 + i;
+                      pageNum = page - 2 + i;
                     }
                     
                     return (
@@ -190,7 +189,11 @@ export default function SearchPage() {
                         variant={page === pageNum ? "default" : "outline"}
                         size="sm"
                         onClick={() => handlePageChange(pageNum)}
-                        className="w-8 h-8 p-0"
+                        className={`w-8 h-8 p-0 ${
+                          page === pageNum 
+                            ? "bg-blue-600 hover:bg-blue-700 border-blue-600" 
+                            : "border-blue-200 text-blue-600 hover:bg-blue-50"
+                        }`}
                       >
                         {pageNum}
                       </Button>
@@ -203,6 +206,7 @@ export default function SearchPage() {
                   size="sm"
                   onClick={() => handlePageChange(page + 1)}
                   disabled={page >= totalPages}
+                  className="border-blue-200 text-blue-600 hover:bg-blue-50"
                 >
                   Next
                   <ChevronRight className="w-4 h-4" />
@@ -212,17 +216,105 @@ export default function SearchPage() {
           </>
         )}
 
-        {searchResults && searchResults.results.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              No products found
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Try adjusting your search terms or browse our categories.
-            </p>
-            <Link href="/">
-              <Button>Back to home</Button>
-            </Link>
+        {!query.trim() && !loading && (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+            <div className="max-w-2xl text-center">
+              <div className="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-8">
+                <div className="w-16 h-16 text-blue-600">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="8" cy="10" r="1.5" fill="white"/>
+                    <circle cx="16" cy="10" r="1.5" fill="white"/>
+                    <path d="M8 16s1.5-2 4-2 4 2 4 2" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                You searched nothing! 🤷‍♂️
+              </h2>
+              <p className="text-xl text-gray-600 mb-10 leading-relaxed">
+                Looks like you forgot to tell us what you're looking for! 
+                <br />Don't worry, it happens to the best of us.
+              </p>
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link href="/">
+                    <Button size="lg" className="bg-blue-600 hover:bg-blue-700 px-8 py-4 text-lg font-semibold">
+                      Back to Home
+                    </Button>
+                  </Link>
+                </div>
+                <div className="bg-white rounded-xl p-6 border shadow-sm">
+                  <p className="text-sm font-medium text-gray-700 mb-3">Try these popular searches:</p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {['Bananas', 'Milk', 'Bread', 'Chicken', 'Rice', 'Eggs'].map((suggestion) => (
+                      <button 
+                        key={suggestion}
+                        onClick={() => router.push(`/search?q=${encodeURIComponent(suggestion)}`)}
+                        className="px-4 py-2 text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full transition-colors border border-blue-200"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {searchResults && searchResults.results.length === 0 && !loading && query.trim() && (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+            <div className="max-w-2xl text-center">
+              <div className="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-8">
+                <div className="w-16 h-16 text-blue-600">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="8" cy="10" r="1.5" fill="white"/>
+                    <circle cx="16" cy="10" r="1.5" fill="white"/>
+                    <path d="M8 16s1.5-2 4-2 4 2 4 2" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                  </svg>
+                </div>
+              </div>
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                No products found
+              </h2>
+              <p className="text-xl text-gray-600 mb-10 leading-relaxed">
+                We couldn't find any products matching "<span className="font-bold text-gray-900 bg-gray-100 px-2 py-1 rounded">{query}</span>". 
+                <br />Try adjusting your search terms or browse our popular categories.
+              </p>
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link href="/">
+                    <Button size="lg" className="bg-blue-600 hover:bg-blue-700 px-8 py-4 text-lg font-semibold">
+                      Back to Home
+                    </Button>
+                  </Link>
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="px-8 py-4 text-lg border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
+                    onClick={() => router.push('/search?q=')}
+                  >
+                    Browse All Products
+                  </Button>
+                </div>
+                <div className="bg-white rounded-xl p-6 border shadow-sm">
+                  <p className="text-sm font-medium text-gray-700 mb-3">Try these popular searches:</p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {['Bananas', 'Milk', 'Bread', 'Chicken', 'Rice', 'Eggs'].map((suggestion) => (
+                      <button 
+                        key={suggestion}
+                        onClick={() => router.push(`/search?q=${encodeURIComponent(suggestion)}`)}
+                        className="px-4 py-2 text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full transition-colors border border-blue-200"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
