@@ -39,23 +39,44 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Fetch from your external API
+    // Fetch from your external API with timeout
     const externalApiUrl = process.env.EXTERNAL_API_URL || 'http://localhost:8000';
     const apiUrl = `${externalApiUrl}/api/products/search?q=${encodeURIComponent(q)}&offset=${offset}&limit=${limit}`;
     
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'accept': 'application/json',
-      },
-    });
+    // Create timeout controller
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`External API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data: SearchResponse = await response.json();
+      return NextResponse.json(data);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        console.error('Search request timed out');
+        return NextResponse.json(
+          { error: 'Search request timed out. Please try again.' },
+          { status: 504 }
+        );
+      }
+      throw fetchError;
     }
-
-    const data: SearchResponse = await response.json();
-    return NextResponse.json(data);
 
   } catch (error) {
     console.error('Error searching products:', error);

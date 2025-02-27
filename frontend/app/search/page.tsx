@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/header';
@@ -33,48 +33,106 @@ interface SearchResponse {
   has_next: boolean;
 }
 
+// Simple in-memory cache for search results
+const searchCache = new Map<string, { data: SearchResponse; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const REQUEST_TIMEOUT = 10000; // 10 seconds
+
 export default function SearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const query = searchParams.get('q') || '';
   const page = parseInt(searchParams.get('page') || '1');
   const limit = 12;
   const offset = (page - 1) * limit;
 
-  useEffect(() => {
-    if (query) {
-      performSearch(query, offset);
-    }
-  }, [query, offset]);
-
-  const performSearch = async (searchTerm: string, searchOffset: number = 0) => {
+  const performSearch = useCallback(async (searchTerm: string, searchOffset: number = 0) => {
     if (!searchTerm.trim()) return;
+
+    // Cancel previous request if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create cache key
+    const cacheKey = `${searchTerm.trim().toLowerCase()}-${searchOffset}-${limit}`;
+    
+    // Check cache first
+    const cached = searchCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      console.log('Using cached search results');
+      setSearchResults(cached.data);
+      setError(null);
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
+    // Create new abort controller for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       const response = await fetch(
-        `/api/products/search?q=${encodeURIComponent(searchTerm)}&offset=${searchOffset}&limit=${limit}`
+        `/api/products/search?q=${encodeURIComponent(searchTerm)}&offset=${searchOffset}&limit=${limit}`,
+        { 
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
       );
 
       if (!response.ok) {
-        throw new Error('Search failed');
+        throw new Error(`Search failed: ${response.status}`);
       }
 
       const data: SearchResponse = await response.json();
+      
+      // Cache the results
+      searchCache.set(cacheKey, { data, timestamp: Date.now() });
+      
+      // Clean old cache entries (keep only last 50 entries)
+      if (searchCache.size > 50) {
+        const oldestKey = Array.from(searchCache.keys())[0];
+        searchCache.delete(oldestKey);
+      }
+      
       setSearchResults(data);
     } catch (err) {
-      setError('Failed to search products. Please try again.');
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.log('Search request was cancelled');
+        return; // Don't set error for cancelled requests
+      }
+      
+      setError('Search is taking longer than usual. Please try again.');
       console.error('Search error:', err);
     } finally {
       setLoading(false);
+      abortControllerRef.current = null;
     }
-  };
+  }, [limit]);
+
+  useEffect(() => {
+    if (query) {
+      performSearch(query, offset);
+    }
+  }, [query, offset, performSearch]);
+
+  // Cleanup function to cancel requests on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams);
@@ -99,7 +157,17 @@ export default function SearchPage() {
           </div>
         )}
 
-        {loading && <SearchResultsSkeleton />}
+        {loading && (
+          <>
+            <div className="flex items-center justify-center mb-4">
+              <div className="flex items-center gap-2 text-blue-600">
+                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-sm font-medium">Searching products...</span>
+              </div>
+            </div>
+            <SearchResultsSkeleton />
+          </>
+        )}
 
         {error && (
           <div className="text-center py-12">
@@ -118,14 +186,29 @@ export default function SearchPage() {
                 <Link key={product.id} href={`/product/${product.id}`}>
                   <Card className="h-full hover:shadow-xl hover:scale-105 transition-all duration-200 cursor-pointer border-0 shadow-md">
                     <CardContent className="p-5">
-                      <div className="aspect-square relative mb-4 bg-gray-50 rounded-xl overflow-hidden">
-                        <Image
-                          src={product.image_url || '/placeholder-product.jpg'}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                        />
+                      <div className="aspect-square relative mb-4 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center">
+                        {product.image_url ? (
+                          <Image
+                            src={product.image_url}
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent && !parent.querySelector('.fallback-icon')) {
+                                const fallback = document.createElement('div');
+                                fallback.className = 'fallback-icon flex items-center justify-center w-full h-full';
+                                fallback.innerHTML = '<svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"/></svg>';
+                                parent.appendChild(fallback);
+                              }
+                            }}
+                          />
+                        ) : (
+                          <ShoppingCart className="w-12 h-12 text-gray-400" />
+                        )}
                       </div>
                       
                       <div className="space-y-3">

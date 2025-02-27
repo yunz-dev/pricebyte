@@ -18,7 +18,7 @@ export default function Footer() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a 
-                href="https://github.com/pricebyte/pricebyte" 
+                href="https://github.com/yunz-dev/pricebyte" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
@@ -27,7 +27,7 @@ export default function Footer() {
                 Star on GitHub
               </a>
               <a 
-                href="https://github.com/pricebyte/pricebyte/issues" 
+                href="https://github.com/yunz-dev/pricebyte/issues" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-blue-700 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-800 transition-colors border border-blue-500"

@@ -14,6 +14,7 @@ interface PriceHistoryEntry {
 interface StoreProduct {
   storeProductId: number;
   store: string;
+  storeName: string;
   standardPrice: number;
   productUrl: string | null;
   priceHistory: PriceHistoryEntry[];
@@ -376,6 +377,7 @@ function convertStoreProducts(apiStoreProducts: ApiStoreProduct[]): StoreProduct
   return apiStoreProducts.map(storeProduct => ({
     storeProductId: storeProduct.id,
     store: capitalizeFirstLetter(storeProduct.store),
+    storeName: storeProduct.store_name,
     standardPrice: storeProduct.current_price,
     productUrl: storeProduct.product_url,
     priceHistory: convertPriceHistory(storeProduct.price_history)

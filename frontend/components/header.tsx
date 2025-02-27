@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,17 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
-  };
+  }, [searchQuery, router]);
+
+  // Optimized search query handling
+  const optimizedSearchQuery = useMemo(() => {
+    return searchQuery.trim();
+  }, [searchQuery]);
 
   return (
     <nav className="w-full bg-blue-600 shadow-lg px-6 py-3 grid grid-cols-3 items-center sticky top-0 z-50">

@@ -8,7 +8,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, BarChart3, FileText, Brain, ExternalLink } from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart3, FileText, Brain, ExternalLink, ShoppingCart } from 'lucide-react';
 import PriceHistory from "@/components/priceHistory";
 import { ProductPageSkeleton, BreadcrumbSkeleton } from "@/components/skeletons";
 
@@ -42,6 +42,7 @@ interface ProductPageProps {
 interface StoreProduct {
   storeProductId: number;
   store: string;
+  storeName: string;
   standardPrice: number;
   productUrl: string;
   priceHistory: {
@@ -236,7 +237,7 @@ export default function Product({ params }: ProductPageProps) {
               {productData.category}
             </button>
             <span className="mx-2">›</span>
-            <span className="text-gray-900">{productData.name}</span>
+            <span className="text-gray-900">{currStoreProduct.storeName}</span>
           </nav>
         </div>
       </div>
@@ -323,10 +324,13 @@ export default function Product({ params }: ProductPageProps) {
                   </span>
                 </div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight mb-3">
-                  {productData.name}
+                  {currStoreProduct.storeName}
                 </h1>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                <p className="text-gray-600 text-sm leading-relaxed mb-2">
                   {productData.description}
+                </p>
+                <p className="text-xs text-gray-500 italic">
+                  Generic Name: {productData.name}
                 </p>
               </div>
 
