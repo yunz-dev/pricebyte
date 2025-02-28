@@ -1,5 +1,28 @@
 # React + TypeScript + Vite
 
+File Structure:
+```
+frontend/
+│── src/
+│   ├── components/          # Reusable UI components
+│   ├── pages/               # Pages for routing
+│   ├── hooks/               # Custom React hooks
+│   ├── context/             # React Context API state management (if needed)
+│   ├── services/            # API calls (fetching data from backend)
+│   ├── utils/               # Helper functions
+│   ├── App.tsx              # Main app component
+│   ├── index.tsx            # Entry point
+│── tests/                   # Jest & React Testing Library tests
+│   ├── components/          # Component unit tests
+│   ├── pages/               # Page rendering tests
+│   ├── services/            # Mock API call tests
+│── public/
+│── package.json
+│── Dockerfile               # Frontend containerization
+│── README.md
+
+```
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
