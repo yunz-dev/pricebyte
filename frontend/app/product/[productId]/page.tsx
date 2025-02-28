@@ -129,10 +129,10 @@ export default function Product({ params }: ProductPageProps) {
             <div className="w-32 h-32 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-8">
               <div className="w-16 h-16 text-red-600">
                 <svg viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="12" r="10"/>
-                  <circle cx="8" cy="10" r="1.5" fill="white"/>
-                  <circle cx="16" cy="10" r="1.5" fill="white"/>
-                  <path d="M8 16s1.5-2 4-2 4 2 4 2" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="8" cy="10" r="1.5" fill="white" />
+                  <circle cx="16" cy="10" r="1.5" fill="white" />
+                  <path d="M8 16s1.5-2 4-2 4 2 4 2" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" />
                 </svg>
               </div>
             </div>
@@ -181,26 +181,26 @@ export default function Product({ params }: ProductPageProps) {
 
   const getStoreColors = (storeName: string, isSelected: boolean) => {
     const store = storeName.toLowerCase();
-    
+
     if (store === 'coles') {
-      return isSelected 
-        ? 'bg-red-600 text-white hover:bg-red-700 shadow-lg' 
+      return isSelected
+        ? 'bg-red-600 text-white hover:bg-red-700 shadow-lg'
         : 'bg-white text-red-600 hover:bg-red-50 border-2 border-red-600';
     } else if (store === 'woolworths') {
-      return isSelected 
-        ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg' 
+      return isSelected
+        ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg'
         : 'bg-white text-green-600 hover:bg-green-50 border-2 border-green-600';
     } else if (store === 'aldi') {
-      return isSelected 
-        ? 'bg-orange-600 text-white hover:bg-orange-700 shadow-lg' 
+      return isSelected
+        ? 'bg-orange-600 text-white hover:bg-orange-700 shadow-lg'
         : 'bg-white text-orange-600 hover:bg-orange-50 border-2 border-orange-600';
     } else if (store === 'iga') {
-      return isSelected 
-        ? 'bg-gray-600 text-white hover:bg-gray-700 shadow-lg' 
+      return isSelected
+        ? 'bg-gray-600 text-white hover:bg-gray-700 shadow-lg'
         : 'bg-white text-gray-600 hover:bg-gray-50 border-2 border-gray-600';
     } else {
-      return isSelected 
-        ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg' 
+      return isSelected
+        ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg'
         : 'bg-white text-blue-600 hover:bg-blue-50 border-2 border-blue-600';
     }
   };
@@ -210,7 +210,7 @@ export default function Product({ params }: ProductPageProps) {
     if (storeProduct.productUrl) {
       window.open(storeProduct.productUrl, '_blank');
     }
-    
+
     // Also update the selected store for price history display
     setCurrStoreProduct(storeProduct);
   };
@@ -218,19 +218,19 @@ export default function Product({ params }: ProductPageProps) {
   return (
     <div className="w-full bg-gray-50 min-h-screen flex flex-col">
       <Header />
-      
+
       {/* Breadcrumb */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-3 max-w-7xl">
           <nav className="text-sm text-gray-600">
-            <button 
+            <button
               onClick={() => router.push('/')}
               className="hover:text-blue-600 transition-colors"
             >
               Home
-            </button> 
+            </button>
             <span className="mx-2">›</span>
-            <button 
+            <button
               onClick={() => router.push(`/search?q=${encodeURIComponent(productData.category)}`)}
               className="hover:text-blue-600 transition-colors"
             >
@@ -244,7 +244,7 @@ export default function Product({ params }: ProductPageProps) {
 
       <div className="flex-1 container mx-auto px-4 py-6 max-w-7xl">
         <div className="grid lg:grid-cols-12 gap-6">
-          
+
           {/* Product Images and Price History - Left Column */}
           <div className="lg:col-span-7">
             <div className="sticky top-24 space-y-6">
@@ -252,11 +252,11 @@ export default function Product({ params }: ProductPageProps) {
               <div className="bg-white rounded-2xl p-8 shadow-sm border">
                 <div className="aspect-square bg-gray-50 rounded-xl flex items-center justify-center">
                   {productData.imageUrl ? (
-                    <Image 
-                      src={productData.imageUrl} 
-                      alt={productData.name} 
-                      width={500} 
-                      height={500} 
+                    <Image
+                      src={productData.imageUrl}
+                      alt={productData.name}
+                      width={500}
+                      height={500}
                       className="rounded-lg object-contain max-w-full max-h-full"
                     />
                   ) : (
@@ -283,7 +283,7 @@ export default function Product({ params }: ProductPageProps) {
                 </CardHeader>
                 <CardContent>
                   <PriceHistory params={{ priceHistory: currStoreProduct.priceHistory }} />
-                  
+
                   {/* AI Insights Section */}
                   <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
                     <div className="flex items-center gap-2 mb-3">
@@ -312,7 +312,7 @@ export default function Product({ params }: ProductPageProps) {
           {/* Product Info - Right Column */}
           <div className="lg:col-span-5">
             <div className="bg-white rounded-2xl p-6 shadow-sm border mb-4">
-              
+
               {/* Product Header */}
               <div className="mb-5">
                 <div className="flex items-center gap-2 mb-3">
@@ -343,6 +343,7 @@ export default function Product({ params }: ProductPageProps) {
                     </div>
                     <div className="text-xs text-gray-600">
                       {productData.size} {productData.unit} • From {currStoreProduct.store}
+                      {/* {productData.size} • From {currStoreProduct.store} */}
                     </div>
                   </div>
                   <div className="text-right">
@@ -361,7 +362,7 @@ export default function Product({ params }: ProductPageProps) {
                   {productData.storeProducts.map((storeProduct, index) => {
                     const isSelected = currStoreProduct.store === storeProduct.store;
                     const isLowestPrice = storeProduct.standardPrice === minPrice;
-                    
+
                     return (
                       <div
                         key={index}
@@ -386,7 +387,7 @@ export default function Product({ params }: ProductPageProps) {
                             <ExternalLink className="w-3 h-3" />
                           </a>
                         )}
-                        
+
                         {isLowestPrice && (
                           <div className="absolute -top-1 -right-1 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                             ★ Best Price
@@ -422,11 +423,11 @@ export default function Product({ params }: ProductPageProps) {
                     <div className="text-gray-700 leading-relaxed text-sm">
                       {productData.longDescription.length > 300 ? (
                         <>
-                          <div 
-                            dangerouslySetInnerHTML={{ 
-                              __html: showFullDescription 
-                                ? productData.longDescription 
-                                : productData.longDescription.substring(0, 300) + '...' 
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: showFullDescription
+                                ? productData.longDescription
+                                : productData.longDescription.substring(0, 300) + '...'
                             }}
                           />
                           <Button
@@ -438,7 +439,7 @@ export default function Product({ params }: ProductPageProps) {
                           </Button>
                         </>
                       ) : (
-                        <div 
+                        <div
                           dangerouslySetInnerHTML={{ __html: productData.longDescription }}
                         />
                       )}

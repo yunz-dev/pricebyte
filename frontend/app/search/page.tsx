@@ -61,7 +61,7 @@ export default function SearchPage() {
 
     // Create cache key
     const cacheKey = `${searchTerm.trim().toLowerCase()}-${searchOffset}-${limit}`;
-    
+
     // Check cache first
     const cached = searchCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
@@ -81,7 +81,7 @@ export default function SearchPage() {
     try {
       const response = await fetch(
         `/api/products/search?q=${encodeURIComponent(searchTerm)}&offset=${searchOffset}&limit=${limit}`,
-        { 
+        {
           signal: controller.signal,
           headers: {
             'Content-Type': 'application/json',
@@ -94,23 +94,23 @@ export default function SearchPage() {
       }
 
       const data: SearchResponse = await response.json();
-      
+
       // Cache the results
       searchCache.set(cacheKey, { data, timestamp: Date.now() });
-      
+
       // Clean old cache entries (keep only last 50 entries)
       if (searchCache.size > 50) {
         const oldestKey = Array.from(searchCache.keys())[0];
         searchCache.delete(oldestKey);
       }
-      
+
       setSearchResults(data);
     } catch (err) {
       if (err instanceof Error && err.name === 'AbortError') {
         console.log('Search request was cancelled');
         return; // Don't set error for cancelled requests
       }
-      
+
       setError('Search is taking longer than usual. Please try again.');
       console.error('Search error:', err);
     } finally {
@@ -210,20 +210,21 @@ export default function SearchPage() {
                           <ShoppingCart className="w-12 h-12 text-gray-400" />
                         )}
                       </div>
-                      
+
                       <div className="space-y-3">
                         <h3 className="font-bold text-gray-900 line-clamp-2 text-base leading-tight">
                           {product.name}
                         </h3>
-                        
+
                         <p className="text-sm text-gray-600 font-medium">
-                          {product.brand} • {product.size}{product.unit}
+                          {/* {product.brand} • {product.size}{product.unit} */}
+                          {product.brand} • {product.size}
                         </p>
-                        
+
                         <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">
                           {product.description}
                         </p>
-                        
+
                         <div className="flex items-center justify-between pt-2">
                           <span className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full font-medium">
                             {product.category}
@@ -252,7 +253,7 @@ export default function SearchPage() {
                   <ChevronLeft className="w-4 h-4" />
                   Previous
                 </Button>
-                
+
                 <div className="flex items-center gap-2">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     let pageNum;
@@ -265,25 +266,24 @@ export default function SearchPage() {
                     } else {
                       pageNum = page - 2 + i;
                     }
-                    
+
                     return (
                       <Button
                         key={pageNum}
                         variant={page === pageNum ? "default" : "outline"}
                         size="sm"
                         onClick={() => handlePageChange(pageNum)}
-                        className={`w-8 h-8 p-0 ${
-                          page === pageNum 
-                            ? "bg-blue-600 hover:bg-blue-700 border-blue-600" 
+                        className={`w-8 h-8 p-0 ${page === pageNum
+                            ? "bg-blue-600 hover:bg-blue-700 border-blue-600"
                             : "border-blue-200 text-blue-600 hover:bg-blue-50"
-                        }`}
+                          }`}
                       >
                         {pageNum}
                       </Button>
                     );
                   })}
                 </div>
-                
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -305,10 +305,10 @@ export default function SearchPage() {
               <div className="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-8">
                 <div className="w-16 h-16 text-blue-600">
                   <svg viewBox="0 0 24 24" fill="currentColor">
-                    <circle cx="12" cy="12" r="10"/>
-                    <circle cx="8" cy="10" r="1.5" fill="white"/>
-                    <circle cx="16" cy="10" r="1.5" fill="white"/>
-                    <path d="M8 16s1.5-2 4-2 4 2 4 2" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                    <circle cx="12" cy="12" r="10" />
+                    <circle cx="8" cy="10" r="1.5" fill="white" />
+                    <circle cx="16" cy="10" r="1.5" fill="white" />
+                    <path d="M8 16s1.5-2 4-2 4 2 4 2" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" />
                   </svg>
                 </div>
               </div>
@@ -316,7 +316,7 @@ export default function SearchPage() {
                 You searched nothing! 🤷‍♂️
               </h2>
               <p className="text-xl text-gray-600 mb-10 leading-relaxed">
-                Looks like you forgot to tell us what you're looking for! 
+                Looks like you forgot to tell us what you're looking for!
                 <br />Don't worry, it happens to the best of us.
               </p>
               <div className="space-y-6">
@@ -331,7 +331,7 @@ export default function SearchPage() {
                   <p className="text-sm font-medium text-gray-700 mb-3">Try these popular searches:</p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {['Bananas', 'Milk', 'Bread', 'Chicken', 'Rice', 'Eggs'].map((suggestion) => (
-                      <button 
+                      <button
                         key={suggestion}
                         onClick={() => router.push(`/search?q=${encodeURIComponent(suggestion)}`)}
                         className="px-4 py-2 text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full transition-colors border border-blue-200"
@@ -352,10 +352,10 @@ export default function SearchPage() {
               <div className="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-8">
                 <div className="w-16 h-16 text-blue-600">
                   <svg viewBox="0 0 24 24" fill="currentColor">
-                    <circle cx="12" cy="12" r="10"/>
-                    <circle cx="8" cy="10" r="1.5" fill="white"/>
-                    <circle cx="16" cy="10" r="1.5" fill="white"/>
-                    <path d="M8 16s1.5-2 4-2 4 2 4 2" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round"/>
+                    <circle cx="12" cy="12" r="10" />
+                    <circle cx="8" cy="10" r="1.5" fill="white" />
+                    <circle cx="16" cy="10" r="1.5" fill="white" />
+                    <path d="M8 16s1.5-2 4-2 4 2 4 2" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" />
                   </svg>
                 </div>
               </div>
@@ -363,7 +363,7 @@ export default function SearchPage() {
                 No products found
               </h2>
               <p className="text-xl text-gray-600 mb-10 leading-relaxed">
-                We couldn't find any products matching "<span className="font-bold text-gray-900 bg-gray-100 px-2 py-1 rounded">{query}</span>". 
+                We couldn't find any products matching "<span className="font-bold text-gray-900 bg-gray-100 px-2 py-1 rounded">{query}</span>".
                 <br />Try adjusting your search terms or browse our popular categories.
               </p>
               <div className="space-y-6">
@@ -373,9 +373,9 @@ export default function SearchPage() {
                       Back to Home
                     </Button>
                   </Link>
-                  <Button 
-                    size="lg" 
-                    variant="outline" 
+                  <Button
+                    size="lg"
+                    variant="outline"
                     className="px-8 py-4 text-lg border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
                     onClick={() => router.push('/search?q=')}
                   >
@@ -386,7 +386,7 @@ export default function SearchPage() {
                   <p className="text-sm font-medium text-gray-700 mb-3">Try these popular searches:</p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {['Bananas', 'Milk', 'Bread', 'Chicken', 'Rice', 'Eggs'].map((suggestion) => (
-                      <button 
+                      <button
                         key={suggestion}
                         onClick={() => router.push(`/search?q=${encodeURIComponent(suggestion)}`)}
                         className="px-4 py-2 text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full transition-colors border border-blue-200"
