@@ -10,38 +10,38 @@ class FakeDataGenerator:
     FAKE_PRODUCTS = [
         {
             "store_product_id": 1001,
-            "product_name": "Simply Nature Organic Bananas",
-            "price": 1.99,
+            "product_name": "Simply-Nature-Organic-Bananas",
+            "price": 2.99,
         },
         {
             "store_product_id": 1002,
-            "product_name": "Never Any! Chicken Breast",
-            "price": 4.99,
+            "product_name": "Never-An-! Chicken-Breast",
+            "price": 2.99,
         },
         {
             "store_product_id": 1003,
             "product_name": "LiveGFree Gluten Free Bread",
-            "price": 3.49,
+            "price": 2.49,
         },
         {
             "store_product_id": 1004,
-            "product_name": "Simply Nature Almond Milk",
+            "product_name": "Simply Nature Almonds Milk",
             "price": 2.29,
         },
         {
             "store_product_id": 1005,
-            "product_name": "Earth Grown Plant Based Burgers",
-            "price": 3.99,
+            "product_name": "Earth Grown PlantBased Burgers",
+            "price": 2.99,
         },
         {
             "store_product_id": 1006,
-            "product_name": "Livewell Greek Yogurt",
-            "price": 4.49,
+            "product_name": "livewell Greek Yogurt",
+            "price": 2.49,
         },
         {
             "store_product_id": 1007,
-            "product_name": "Dakota's Pride Pasta",
-            "price": 0.95,
+            "product_name": "Dakotasss Pride Pasta",
+            "price": 2.95,
         },
         {"store_product_id": 1008, "product_name": "Carlini Olive Oil", "price": 2.99},
     ]
@@ -54,7 +54,7 @@ class FakeDataGenerator:
             products.append(
                 PriceUpdates(
                     store_product_id=product_data["store_product_id"],
-                    store=Store.ALDI,  # Assuming Store is an enum
+                    store=Store.Coles,  # Assuming Store is an enum
                     product_name=product_data["product_name"],
                     price=product_data["price"],
                 )
@@ -67,7 +67,7 @@ class FakeDataGenerator:
     def generate_product_details(cls, product: PriceUpdates) -> Dict[str, Any]:
         """Generate fake detailed product info based on the PriceUpdates input."""
         return {
-            "brand": cls.get_brand_from_name(product.product_name),
+            "brand": "fake-test-brand",
             "category": cls.get_category_from_name(product.product_name),
             "description": f"High quality {product.product_name.lower()} available at Aldi",
             "weight": f"{random.uniform(100, 2000):.0f}g",
@@ -93,11 +93,11 @@ class FakeDataGenerator:
         elif "Never Any!" in product_name:
             return "Never Any!"
         elif "LiveGFree" in product_name:
-            return "LiveGFree"
+            return "Live-GFree"
         elif "Earth Grown" in product_name:
             return "Earth Grown"
         elif "Livewell" in product_name:
-            return "Livewell"
+            return "Live-well"
         elif "Dakota's Pride" in product_name:
             return "Dakota's Pride"
         elif "Carlini" in product_name:

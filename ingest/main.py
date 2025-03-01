@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from datetime import date, datetime
 from typing import List
@@ -7,13 +8,27 @@ from models import get_db, create_tables, Product, StoreProduct, PriceHistory
 from schemas import ProductCreateRequest, ProductResponse, ProductInfo, StoreProductInfo, ProductWithStores, StoreProductWithHistory, PriceHistoryInfo, PriceUpdateRequest, PriceUpdateResponse, ProductSearchResult, ProductSearchResponse
 from processors import ProcessorFactory
 from matcher import ProductMatcher
-from config import API_TITLE, API_DESCRIPTION, API_VERSION
+from config import API_TITLE, API_DESCRIPTION, API_VERSION, STATIC_MODE
 
 app = FastAPI(
     title=API_TITLE,
     description=API_DESCRIPTION,
     version=API_VERSION
 )
+
+@app.middleware("http")
+async def static_mode_middleware(request: Request, call_next):
+    """Block POST requests when STATIC_MODE is enabled"""
+    if STATIC_MODE and request.method == "POST":
+        return JSONResponse(
+            status_code=405,
+            content={
+                "detail": "POST requests are disabled in static mode. Set STATIC environment variable to false to enable writes.",
+                "static_mode": True
+            }
+        )
+    response = await call_next(request)
+    return response
 
 @app.on_event("startup")
 async def startup_event():

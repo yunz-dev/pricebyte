@@ -1,15 +1,20 @@
 from fuzzywuzzy import fuzz
 from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session
-from models import Product, StoreProduct
-from config import SIMILARITY_THRESHOLD
+from models import Product
 import re
 
 
-class ProductMatcher:
-    def __init__(self, db: Session, threshold: float = 0.91):
+class TestProductMatcher:
+    def __init__(self, db: Session, threshold: float = 0.91, 
+                 name_weight: float = 0.5, brand_weight: float = 0.25, 
+                 category_weight: float = 0.05, size_weight: float = 0.2):
         self.db = db
         self.threshold = threshold
+        self.name_weight = name_weight
+        self.brand_weight = brand_weight
+        self.category_weight = category_weight
+        self.size_weight = size_weight
 
     def find_matching_product(
         self, name: str, brand: str, category: str, size: str
@@ -33,83 +38,25 @@ class ProductMatcher:
 
         return best_match
 
-    def search_products_by_name(self, search_name: str, limit: int = 10) -> List[Tuple[Product, float]]:
-        """Search for products by name similarity, returning top matches with scores"""
-        if not search_name or not search_name.strip():
+    def find_all_matches_with_scores(
+        self, name: str, brand: str, category: str, size: str, limit: int = 10
+    ) -> List[Tuple[Product, float]]:
+        """Return top matches with their scores for testing"""
+        candidates = self._get_candidates()
+
+        if not candidates:
             return []
-            
-        # Performance optimization: pre-filter candidates using database LIKE queries
-        search_words = search_name.strip().lower().split()
-        if not search_words:
-            return []
-            
-        # Use all search words but make filtering more flexible
-        from sqlalchemy.orm import joinedload
-        from sqlalchemy import or_
-        
-        # Build more flexible filters - match ANY word in either name type
-        all_filters = []
-        
-        for word in search_words:
-            # For each word, check if it appears in EITHER product name OR store name
-            word_filters = or_(
-                Product.name.ilike(f"%{word}%"),
-                StoreProduct.store_name.ilike(f"%{word}%")
+
+        matches = []
+        for candidate in candidates:
+            score = self._calculate_similarity_score(
+                name, brand, category, size, candidate.name, candidate.brand, candidate.category, candidate.size
             )
-            all_filters.append(word_filters)
-        
-        # Get products where ANY of the search words match (much more inclusive)
-        products_with_stores = (
-            self.db.query(Product)
-            .options(joinedload(Product.store_products))
-            .join(StoreProduct, Product.id == StoreProduct.product_id, isouter=True)
-            .filter(or_(*all_filters))  # Match ANY word in ANY name
-            .distinct()
-            .limit(500)  # Limit to prevent too many candidates
-            .all()
-        )
+            matches.append((candidate, score))
 
-        if not products_with_stores:
-            return []
-
-        scored_products = []
-        search_name_clean = self._clean_text(search_name)
-        
-        # Early exit threshold - if we find exact matches, prioritize them
-        exact_matches = []
-        high_quality_matches = []
-
-        for product in products_with_stores:
-            # Calculate similarity against product name
-            candidate_name_clean = self._clean_text(product.name)
-            product_name_similarity = fuzz.token_sort_ratio(search_name_clean, candidate_name_clean) / 100.0
-            
-            # Find the best match among store product names
-            best_store_name_similarity = 0.0
-            
-            for store_product in product.store_products:
-                if store_product.store_name:
-                    store_name_clean = self._clean_text(store_product.store_name)
-                    store_name_similarity = fuzz.token_sort_ratio(search_name_clean, store_name_clean) / 100.0
-                    best_store_name_similarity = max(best_store_name_similarity, store_name_similarity)
-            
-            # Weighted combination: give high weight to store names, moderate to product names
-            # Store names get 0.7 weight, product names get 0.3 weight
-            final_similarity = (0.7 * best_store_name_similarity) + (0.3 * product_name_similarity)
-            
-            # Categorize matches for early exit optimization
-            if final_similarity >= 0.95:
-                exact_matches.append((product, final_similarity))
-            elif final_similarity >= 0.7:
-                high_quality_matches.append((product, final_similarity))
-            elif final_similarity >= 0.4:  # Only keep decent matches
-                scored_products.append((product, final_similarity))
-
-        # Combine and sort results, prioritizing exact matches
-        all_matches = exact_matches + high_quality_matches + scored_products
-        all_matches.sort(key=lambda x: x[1], reverse=True)
-        
-        return all_matches[:limit]
+        # Sort by score descending and return top matches
+        matches.sort(key=lambda x: x[1], reverse=True)
+        return matches[:limit]
 
     def _get_candidates(self) -> List[Product]:
         return self.db.query(Product).all()
@@ -121,12 +68,6 @@ class ProductMatcher:
         name2_clean = self._clean_text(name2)
 
         name_similarity = fuzz.token_sort_ratio(name1_clean, name2_clean) / 100.0
-
-        # Optimized weights - size matters for exact products
-        name_weight = 0.5
-        brand_weight = 0.25
-        category_weight = 0.05
-        size_weight = 0.2
 
         # Brand fuzzy matching
         brand_similarity = 1.0
@@ -152,13 +93,68 @@ class ProductMatcher:
             size_similarity = 0.7
 
         total_score = (
-            name_weight * name_similarity
-            + brand_weight * brand_similarity
-            + category_weight * category_similarity
-            + size_weight * size_similarity
+            self.name_weight * name_similarity
+            + self.brand_weight * brand_similarity
+            + self.category_weight * category_similarity
+            + self.size_weight * size_similarity
         )
 
         return total_score
+
+    def get_score_breakdown(
+        self, name1: str, brand1: str, category1: str, size1: str, name2: str, brand2: str, category2: str, size2: str
+    ) -> dict:
+        """Get detailed breakdown of similarity scores for debugging"""
+        name1_clean = self._clean_text(name1)
+        name2_clean = self._clean_text(name2)
+
+        name_similarity = fuzz.token_sort_ratio(name1_clean, name2_clean) / 100.0
+
+        # Brand fuzzy matching
+        brand_similarity = 1.0
+        if brand1 and brand2:
+            brand1_clean = self._clean_brand(brand1)
+            brand2_clean = self._clean_brand(brand2)
+            brand_similarity = fuzz.token_sort_ratio(brand1_clean, brand2_clean) / 100.0
+        elif brand1 or brand2:
+            brand_similarity = 0.5
+
+        # Category fuzzy matching
+        category_similarity = 1.0
+        if category1 and category2:
+            category_similarity = fuzz.token_sort_ratio(category1.lower(), category2.lower()) / 100.0
+        elif category1 or category2:
+            category_similarity = 0.6
+
+        # Size comparison
+        size_similarity = 1.0
+        if size1 and size2:
+            size_similarity = self._compare_sizes(size1, size2)
+        elif size1 or size2:
+            size_similarity = 0.7
+
+        total_score = (
+            self.name_weight * name_similarity
+            + self.brand_weight * brand_similarity
+            + self.category_weight * category_similarity
+            + self.size_weight * size_similarity
+        )
+
+        return {
+            'name_similarity': name_similarity,
+            'brand_similarity': brand_similarity,
+            'category_similarity': category_similarity,
+            'size_similarity': size_similarity,
+            'name_weighted': self.name_weight * name_similarity,
+            'brand_weighted': self.brand_weight * brand_similarity,
+            'category_weighted': self.category_weight * category_similarity,
+            'size_weighted': self.size_weight * size_similarity,
+            'total_score': total_score,
+            'name_clean1': name1_clean,
+            'name_clean2': name2_clean,
+            'brand_clean1': self._clean_brand(brand1) if brand1 else '',
+            'brand_clean2': self._clean_brand(brand2) if brand2 else ''
+        }
 
     def _clean_text(self, text: str) -> str:
         if not text:
@@ -254,4 +250,3 @@ class ProductMatcher:
         elif unit == "l":
             return value * 1000
         return None
-

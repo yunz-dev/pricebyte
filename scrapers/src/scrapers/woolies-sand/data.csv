@@ -1,0 +1,22 @@
+L1_category,categoryId,formatObject,location,url
+Fruit_Veg,1-E5BEE36E,"{\""name\"":\""Fruit & Veg\""}",/shop/browse/fruit-veg,/shop/browse/fruit-veg
+Poultry_Meat_Seafood,1_D5A2236,"{\""name\"":\""Poultry, Meat & Seafood\""}",/shop/browse/poultry-meat-seafood,/shop/browse/poultry-meat-seafood
+Deli_Chilled_Meats,1_3151F6F,"{\""name\"":\""Deli & Chilled Meals\""}",/shop/browse/deli-chilled-meals,/shop/browse/deli-chilled-meals
+Dairy_Eggs_Fridge,1_6E4F4E4,"{\""name\"":\""Dairy, Eggs & Fridge\""}",/shop/browse/dairy-eggs-fridge,/shop/browse/dairy-eggs-fridge
+Bakery,1_DEB537E,"{\""name\"":\""Bakery\""}",/shop/browse/bakery,/shop/browse/bakery
+Lunch_Box,1_9E92C35,"{\""name\"":\""Lunch Box\""}",/shop/browse/lunch-box,/shop/browse/lunch-box
+Freezer,1_ACA2FC2,"{\""name\"":\""Freezer\""}",/shop/browse/freezer,/shop/browse/freezer
+Snacks_Confectionary,1_717445A,"{\""name\"":\""Snacks & Confectionery\""}",/shop/browse/snacks-confectionery,/shop/browse/snacks-confectionery
+Pantry,1_39FD49C,"{\""name\"":\""Pantry\""}",/shop/browse/pantry,/shop/browse/pantry
+International_Foods,1_F229FBE,"{\""name\"":\""International Foods\""}",/shop/browse/international-foods,/shop/browse/international-foods
+Drinks,1_5AF3A0A,"{\""name\"":\""Drinks\""}",/shop/browse/drinks,/shop/browse/drinks
+Beauty,1_8D61DD6,"{\""name\"":\""Beauty\""}",/shop/browse/beauty,/shop/browse/beauty
+Beer_Wine_Spirits,1_8E4DA6F,"{\""name\"":\""Beer, Wine & Spirits\""}",/shop/browse/beer-wine-spirits,/shop/browse/beer-wine-spirits
+Personal_Care,1_894D0A8,"{\""name\"":\""Personal Care\""}",/shop/browse/personal-care,/shop/browse/personal-care
+Health_Wellness,1_9851658,"{\""name\"":\""Health & Wellness\""}",/shop/browse/health-wellness,/shop/browse/health-wellness
+Cleaning_Maintenance,1_2432B58,"{\""name\"":\""Cleaning & Maintenance\""}",/shop/browse/cleaning-maintenance,/shop/browse/cleaning-maintenance
+Home_Lifestyle,1_DEA3ED5,"{\""name\"":\""Home & Lifestyle\""}",/shop/browse/home-lifestyle,/shop/browse/home-lifestyle
+Baby,1_717A94B,"{\""name\"":\""Baby\""}",/shop/browse/baby,/shop/browse/baby
+Pet,1_61D6FEB,"{\""name\"":\""Pet\""}",/shop/browse/pet,/shop/browse/pet
+Electronics,1_B863F57,"{\""name\"":\""Electronics\""}",/shop/browse/electronics,/shop/browse/electronics
+Sports_Fitness_Outdoor_Activities,1_B863F57,"{\""name\"":\""Sports, Fitness & Outdoor Activities\""}",/shop/browse/sports-fitness-outdoor-activities,/shop/browse/sports-fitness-outdoor-activities

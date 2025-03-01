@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey, Date, JSON
+from sqlalchemy import create_engine, Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey, Date, JSON, Index
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime, date
@@ -10,7 +10,7 @@ class Product(Base):
     __tablename__ = "products"
     
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(Text, nullable=False)
+    name = Column(Text, nullable=False, index=True)  # Add index for search performance
     brand = Column(Text)
     category = Column(Text, index=True)
     size = Column(Text)
@@ -30,7 +30,7 @@ class StoreProduct(Base):
     store = Column(String(50), nullable=False)
     store_product_id = Column(String(100), nullable=False)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
-    store_name = Column(Text, nullable=False)
+    store_name = Column(Text, nullable=False, index=True)  # Add index for search performance
     current_price = Column(Float)
     product_url = Column(Text)
     availability = Column(Boolean, default=True)
