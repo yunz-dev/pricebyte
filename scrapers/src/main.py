@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from scrapers.woolies import get_data, get_data_from_url
+from scrapers.woolies import get_data
 
 app = FastAPI(
     title="PriceByte Scraping API",
@@ -14,6 +14,11 @@ app = FastAPI(
         "url": "https://www.gnu.org/licenses/gpl-3.0.en.html",
     },
 )
+
+
+@app.get("/heart")
+def heart():
+    return {"message": "healthy"}
 
 
 @app.get("/woolies-store/id/{product_id}")
