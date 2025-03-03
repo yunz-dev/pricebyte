@@ -3,8 +3,8 @@ import random
 import re
 import time
 
-from model import Product
 from selenium.webdriver.firefox.options import Options
+from utils.model import Product
 
 pages = [
     "https://www.woolworths.com.au/shop/productdetails/",
