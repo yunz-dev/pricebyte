@@ -1,4 +1,3 @@
-import pytest
 
 from scrapers.woolies import jsonify
 
