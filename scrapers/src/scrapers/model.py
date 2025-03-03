@@ -9,7 +9,7 @@ class Product(BaseModel):
     price: float
     unit_price: float
     original_price: float
-    availability: str
+    availability: bool
     image_url: str
     product_url: str
     weight: str
