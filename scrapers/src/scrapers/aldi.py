@@ -5,6 +5,7 @@ from model import Product
 def clean_str(string: str) -> str:
     return string.replace("\n\t", "").strip()
 
+
 def get_all_content(tags: list[Tag]) -> list[str]:
     res = []
     for tag in tags:
@@ -16,10 +17,12 @@ def get_all_content(tags: list[Tag]) -> list[str]:
                     res.append(child)
     return res
 
+
 def get_str_content(string: NavigableString | Tag) -> str:
     if not string:
         return ""
     return clean_str(str(string.string))
+
 
 def parse_category(nav: Tag) -> str:
     if not nav:
@@ -33,6 +36,7 @@ def parse_category(nav: Tag) -> str:
         return ""
     return get_str_content(text)
 
+
 def parse_price(pricebox: Tag) -> float:
     if not pricebox:
         return 0.0
@@ -42,6 +46,7 @@ def parse_price(pricebox: Tag) -> float:
         return 0.0
     value = ''.join(c for c in value if c.isnumeric())
     return float(f"{value}.{decimal}")
+
 
 def parse_unit_price(pricebox: Tag) -> float:
     if not pricebox:
@@ -55,6 +60,7 @@ def parse_unit_price(pricebox: Tag) -> float:
     if unit_price.endswith("c"):
         return float("0." + unit_price.replace("c", ""))
 
+
 def parse_orig_price(pricebox: Tag) -> float:
     if not pricebox:
         return 0
@@ -63,10 +69,12 @@ def parse_orig_price(pricebox: Tag) -> float:
         return parse_price(pricebox)
     return float(orig)
 
+
 def parse_amount(pricebox: Tag) -> str:
     if not pricebox:
         return ""
     return get_str_content(pricebox.find("span", "box--amount")).replace("$", "")
+
 
 def parse_image(detail: Tag) -> str:
     if not detail:
@@ -76,6 +84,7 @@ def parse_image(detail: Tag) -> str:
         return ""
     return img.get("src", "")
 
+
 def parse_name(detail: Tag) -> str:
     if not detail:
         return ""
@@ -84,10 +93,12 @@ def parse_name(detail: Tag) -> str:
         return ""
     return get_str_content(title)
 
+
 def parse_desc(desc_ul: Tag) -> str:
     li_s = desc_ul.find_all("li")
     desc_arr = get_all_content(li_s)
     return ", ".join(desc_arr)
+
 
 def scrape_product(url: str) -> Product:
     """
@@ -109,7 +120,7 @@ def scrape_product(url: str) -> Product:
     return Product(
         store="Aldi Store",
         product_name=parse_name(detail),
-        brand=parse_name(detail).split(" "),
+        brand=parse_name(detail),
         category=parse_category(nav),
         price=parse_price(pricebox),
         unit_price=parse_unit_price(pricebox),
