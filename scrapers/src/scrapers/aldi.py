@@ -100,16 +100,19 @@ def parse_desc(desc_ul: Tag) -> str:
     return ", ".join(desc_arr)
 
 
-def scrape_product(url: str) -> Product:
+def scrape_product(url: str) -> Product | None:
     """
     Extracts product details from the given grocery product URL.
 
     :param url: URL of the product page
     :return: Dictionary containing structured product data
     """
-    res = requests.get(url)
+    try:
+        res = requests.get(url)
+    except (requests.exceptions.ConnectionError, requests.exceptions.MissingSchema):
+        return
     if res.status_code != 200:
-        return {}
+        return
     page = BeautifulSoup(res.content, "html.parser")
 
     detail = page.find("div", "detail-box")
