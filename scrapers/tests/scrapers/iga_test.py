@@ -1,6 +1,5 @@
-import pytest
 
-from scrapers.iga import get_iga_product, get_product_link
+from scrapers.iga import get_product_link
 
 def test_get_product_link():
     """Convert product url to id"""
