@@ -23,7 +23,7 @@ def get_iga_product(product_id: int, store_id: int = 32600) -> Product:
     product_name = data.get("name")
     product_link = get_product_link(product_name)
     product_url = f"https://www.igashop.com.au/product/{product_link}-{product_id}"
-    print(product_url)
+
     # combine weight and weight type
     weight_data = data.get("unitsOfSize", {})
     weight = weight_data.get("size")
