@@ -1,5 +1,5 @@
 import requests
-from util.model import Product
+from utils.model import Product
 import re
 
 
@@ -15,7 +15,7 @@ def fetch_product(url: str, store: int, product: int) -> dict:
 def get_product_link(product_name: str) -> str:
     product_name = product_name.replace("-", " ")
     product_name = re.sub(r"[^\w\s]", "", product_name).split()
-    return "-".join(product_name)
+    return "-".join(product_name).lower()
 
 def get_iga_product(product_id: int, store_id: int = 32600) -> Product:
     data = fetch_product("https://www.igashop.com.au/api/storefront", store_id, product_id)
@@ -23,7 +23,7 @@ def get_iga_product(product_id: int, store_id: int = 32600) -> Product:
     product_name = data.get("name")
     product_link = get_product_link(product_name)
     product_url = f"https://www.igashop.com.au/product/{product_link}-{product_id}"
-    print(product_url)
+
     # combine weight and weight type
     weight_data = data.get("unitsOfSize", {})
     weight = weight_data.get("size")
