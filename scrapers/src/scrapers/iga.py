@@ -1,5 +1,5 @@
 import requests
-from utils.model import Product
+from util.model import Product
 import re
 
 
@@ -12,16 +12,18 @@ def fetch_product(url: str, store: int, product: int) -> dict:
         print(f"Error fetching data: {e}")
         return {}
 
-def get_product_id(product_url: str) -> int:
-    try:
-        return int(product_url.split("-")[-1])
-    except ValueError:
-        return -1
+def get_product_link(product_name: str) -> str:
+    product_name = product_name.replace("-", " ")
+    product_name = re.sub(r"[^\w\s]", "", product_name).split()
+    return "-".join(product_name)
 
-def get_iga_product(product_url: str, store_id: int = 32600) -> Product:
-    product_id = get_product_id(product_url)
+def get_iga_product(product_id: int, store_id: int = 32600) -> Product:
     data = fetch_product("https://www.igashop.com.au/api/storefront", store_id, product_id)
 
+    product_name = data.get("name")
+    product_link = get_product_link(product_name)
+    product_url = f"https://www.igashop.com.au/product/{product_link}-{product_id}"
+    print(product_url)
     # combine weight and weight type
     weight_data = data.get("unitsOfSize", {})
     weight = weight_data.get("size")
@@ -41,9 +43,11 @@ def get_iga_product(product_url: str, store_id: int = 32600) -> Product:
     try:
         price = float(re.sub(r'[^0-9.]', '', data.get("price")))
         unit_price = float(re.sub(r'[^0-9.]', '', data.get("unitPrice")))
+        original_price = float(re.sub(r'[^0-9.]', '', data.get("wasPrice"))) if data.get("wasPrice") else -1
     except ValueError:
         price = -1
         unit_price = -1
+        original_price = -1
 
     return Product(
         store="IGA Store",
@@ -52,7 +56,7 @@ def get_iga_product(product_url: str, store_id: int = 32600) -> Product:
         category=data.get("defaultCategory"),
         price=price,
         unit_price=unit_price,
-        original_price=data.get("wasPrice") if data.get("wasPrice") else -1,
+        original_price=original_price,
         availability=data.get("available"),
         image_url=data.get("primaryImage", {}).get("default"),
         product_url=product_url,

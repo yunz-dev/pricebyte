@@ -36,7 +36,7 @@ def get_woolies_store_by_id(product_id: int):
     return get_data(product_id)
 
 @app.get("/iga-store/store/{store_id}/id/{product_id}")
-def get_iga_product_by_id(product_url: str, store_id: int):
+def get_iga_product_by_id(product_id: int, store_id: int):
     """
 
     Parameters:
@@ -44,9 +44,8 @@ def get_iga_product_by_id(product_url: str, store_id: int):
 
     Returns:
     - **json**: product details
-
     """
-    return get_iga_product(product_url, store_id)
+    return get_iga_product(product_id, store_id)
 
 # NOTE: USELESS
 # @app.get("/woolies-store/page/")
