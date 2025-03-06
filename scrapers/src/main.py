@@ -49,8 +49,8 @@ def get_iga_product_by_id(product_id: int, store_id: int):
     """
     return get_iga_product(product_id, store_id)
 
-@app.get("/aldi-store/url")
-def get_aldi_product_by_url(product_url: str):
+@app.get("/aldi-store/page")
+def get_aldi_product_by_url(product_page: str):
     """
 
     Parameters:
@@ -59,7 +59,7 @@ def get_aldi_product_by_url(product_url: str):
     Returns:
     - **json**: product details
     """
-    return scrape_product(product_url)
+    return scrape_product(product_page)
 
 # NOTE: USELESS
 # @app.get("/woolies-store/page/")
