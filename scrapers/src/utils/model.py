@@ -14,3 +14,17 @@ class Product(BaseModel):
     product_url: str
     weight: str
     description: str
+
+
+class ApiProduct(BaseModel):
+    store: str
+    price: float
+    product_name: str
+    brand: str
+    weight: str
+    product_url: str
+
+
+class ApiProducts(BaseModel):
+    api_uses: int
+    products: list[ApiProduct]
