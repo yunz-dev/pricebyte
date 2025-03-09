@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5431/myappdb
-    username: myuser
-    password: mypassword
+    url: jdbc:postgresql://ep-fragrant-block-a7lnk03h-pooler.ap-southeast-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+    username: neondb_owner
+    password: npg_pFec60LRKvsf
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 20000
