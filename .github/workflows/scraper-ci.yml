@@ -25,7 +25,11 @@ jobs:
         working-directory: scrapers
         run: |
           pip install -r requirements.txt
-          
+
+      - name: Delay for pull requests
+        if: github.event_name == 'pull_request'
+        run: sleep 30
+
       - name: Run tests
         working-directory: scrapers/tests/
         run: pytest --maxfail=1 --disable-warnings
