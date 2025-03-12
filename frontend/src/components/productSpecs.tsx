@@ -3,11 +3,11 @@ import { useState, useEffect } from "react";
 export default function ProductSpecs() {
   
   const [data, setData] = useState({
-    store: "",
-    category: "",
-    brand: "",
+    store: "Woolworths",
+    category: "Dairy",
+    brand: "A2",
     unitPrice: 0,
-    weight: "",
+    weight: "1L",
     availability: false,
   });
 
@@ -21,13 +21,13 @@ export default function ProductSpecs() {
   }, []);
 
   return (
-    <div className="flex flex-col w-full">
-      <p className="text-lg text-bold">Specifications</p>
-      <div className="grid grid-cols-2 w-full">
+    <div className="flex flex-col w-full gap-5">
+      <p className="text-lg font-bold">Specifications</p>
+      <div className="grid grid-cols-2 w-full gap-x-20 gap-y-3">
         {Object.entries(data).map(([key, value]) => (
-          <div key={key} className="flex justify-between p-2 rounded">
-            <span className="font-semibold capitalize">{key.replace(/([A-Z])/g, " $1")}:</span>
-            <span>{typeof value === "boolean" ? (value ? "Yes" : "No") : value}</span>
+          <div key={key} className="flex justify-between px-4 py-2 border-b border-gray-300">
+            <span className="capitalize">{key.replace(/([A-Z])/g, " $1")}:</span>
+            <span className="font-semibold" >{typeof value === "boolean" ? (value ? "Yes" : "No") : value}</span>
           </div>
         ))}
       </div> 

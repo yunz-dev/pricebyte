@@ -6,9 +6,9 @@ function App() {
   return (
     <div className="w-full">
       <Header/>
-      <ProductSpecs />
-      <div className="flex flex-col items-center justify-center w-full min-h-svh">
-        <Button>Look ShadCN is installed</Button>
+      <div className="flex flex-col items-center justify-center w-full min-h-svh px-30">
+        <ProductSpecs />
+
       </div>
       <Footer />
     </div>
