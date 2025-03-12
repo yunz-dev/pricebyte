@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 export default function ProductSpecs() {
   
-  const [data, setData] = useState({
+  const [data, setData] = useState({ /* CHANGE DEFAULT DATA */
     store: "Woolworths",
     category: "Dairy",
     brand: "A2",
@@ -12,7 +12,7 @@ export default function ProductSpecs() {
   });
 
   useEffect(() => {
-    fetch("")
+    fetch("") /* ADD API ENDPOINT URL FOR FETCHING DATA */
       .then(response => response.json())
       .then(result => setData(result))
       .catch(error => {
