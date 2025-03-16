@@ -432,7 +432,7 @@ export async function GET(
     }
 
     // Fetch from your external API
-    const externalApiUrl = process.env.EXTERNAL_API_URL || 'http://localhost:8000';
+    const externalApiUrl = process.env.EXTERNAL_API_URL || 'http://localhost:8080';
     const response = await fetch(`${externalApiUrl}/api/products/${productId}`, {
       method: 'GET',
       headers: {

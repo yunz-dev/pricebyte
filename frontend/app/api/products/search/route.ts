@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch from your external API with timeout
-    const externalApiUrl = process.env.EXTERNAL_API_URL || 'http://localhost:8000';
+    const externalApiUrl = process.env.EXTERNAL_API_URL || 'http://localhost:8080';
     const apiUrl = `${externalApiUrl}/api/products/search?q=${encodeURIComponent(q)}&offset=${offset}&limit=${limit}`;
     
     // Create timeout controller
