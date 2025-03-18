@@ -24,10 +24,10 @@ export default function PriceComparison() {
       <p className="text-lg font-bold">Price Comparison</p>
       <div className="flex flex-col w-full gap-y-5">
         {data.map((item, index) => (
-          <Card key={index} className="flex flex-row justify-between items-center w-full bg-white px-10 min-h-[150px]">  
+          <Card key={index} className="flex flex-row justify-between items-center w-full bg-white px-10 min-h-[130px]">  
             <div className="flex flex-row gap-5 justify-center">
               <img src={item.storeLogo} className="w-[80px]"></img> {/* Store Icon */}
-              <div className="flex flex-col gap-1  justify-center"> {/* Store Name and Last Updated */}
+              <div className="flex flex-col gap-1 justify-center"> {/* Store Name and Last Updated */}
                 <p className="font-bold">{item.store}</p>
                 <p>Last Updated: {new Date(item.lastUpdated).toLocaleDateString("en-GB")}</p> {/* Product Price */}
               </div>
