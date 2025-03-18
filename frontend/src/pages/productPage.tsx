@@ -5,7 +5,7 @@ import ProductBody from "@/components/productBody"
 function ProductPage() {
 
   return (
-    <div className="flex flex-col w-full gap-20"> {/* Main Container */}
+    <div className="flex flex-col w-full gap-25 mb-50"> {/* Main Container */}
       <ProductBody />
       <PriceComparison />
       <ProductSpecs />

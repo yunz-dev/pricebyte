@@ -25,7 +25,7 @@ export default function ProductSpecs() {
       <p className="text-lg font-bold">Specifications</p>
       <div className="grid grid-cols-2 w-full gap-x-20 gap-y-3">
         {Object.entries(data).map(([key, value]) => (
-          <div key={key} className="flex justify-between px-4 py-2 border-b border-gray-300">
+          <div key={key} className="flex justify-between min-h-[60px] px-4 py-2 border-b border-gray-300">
             <span className="capitalize">{key.replace(/([A-Z])/g, " $1")}:</span>
             <span className="font-semibold" >{typeof value === "boolean" ? (value ? "Yes" : "No") : value}</span>
           </div>
