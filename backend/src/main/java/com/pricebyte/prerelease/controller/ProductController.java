@@ -11,145 +11,66 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/products")
-public class ProductController {
+class SearchResult {
+    private Long id;
+    private String name;
+    private String brand;
+    private String category;
+    private String size;
+    private String unit;
+    private String image_url;
+    private String description;
+    private Double similarity_score;
+    private String created_at;
+    private String updated_at;
 
-@Autowired
-    private ProductService productService;
-
-	// @GetMapping("/")
-	// public String index() {
-	// 	return "Greetings from Spring Boot!";
-	// }
-	//
-	// @DeleteMapping("/")
-	// public String index() {
-	// }
-	//
-	@GetMapping("/")
-	public List<Product> getAllProducts() {
-    return this.productService.getAllProducts();
-	}
-
-	@PostMapping("/")
-	public ResponseEntity<?> insertNewProduct(@RequestBody ProductWithStoreProductsDto productDto) {
-    try {
-      Product createdProduct = this.productService.createProductWithStoreProducts(productDto);
-      return ResponseEntity.ok(createdProduct);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body("Error creating product: " + e.getMessage());
+    public SearchResult(Long id, String name, String brand, String category, String size, String unit, String image_url, String description, Double similarity_score, String created_at, String updated_at) {
+        this.id = id;
+        this.name = name;
+        this.brand = brand;
+        this.category = category;
+        this.size = size;
+        this.unit = unit;
+        this.image_url = image_url;
+        this.description = description;
+        this.similarity_score = similarity_score;
+        this.created_at = created_at;
+        this.updated_at = updated_at;
     }
-	}
 
-	// Update price endpoint
-	@PutMapping("/price")
-	public ResponseEntity<?> updatePrice(@RequestBody UpdatePriceDto updatePriceDto) {
-	    try {
-	        boolean updated = this.productService.updateStoreProductPrice(
-	            updatePriceDto.getProductId(), 
-	            updatePriceDto.getStore(), 
-	            updatePriceDto.getNewPrice()
-	        );
-	        
-	        if (updated) {
-	            return ResponseEntity.ok("Price updated successfully");
-	        } else {
-	            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	                .body("Product or store not found");
-	        }
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	            .body("Error updating price: " + e.getMessage());
-	    }
-	}
+    // Getters
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public String getBrand() { return brand; }
+    public String getCategory() { return category; }
+    public String getSize() { return size; }
+    public String getUnit() { return unit; }
+    public String getImage_url() { return image_url; }
+    public String getDescription() { return description; }
+    public Double getSimilarity_score() { return similarity_score; }
+    public String getCreated_at() { return created_at; }
+    public String getUpdated_at() { return updated_at; }
+}
 
-	// Get product by ID
-	@GetMapping("/{id}")
-	public ResponseEntity<?> getProductById(@PathVariable Long id) {
-	    try {
-	        Optional<Product> product = this.productService.getProductById(id);
-	        if (product.isPresent()) {
-	            return ResponseEntity.ok(product.get());
-	        } else {
-	            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	                .body("Product not found with id: " + id);
-	        }
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	            .body("Error retrieving product: " + e.getMessage());
-	    }
-	}
+class SearchResponse {
+    private List<SearchResult> results;
+    private int total_count;
+    private int offset;
+    private int limit;
+    private boolean has_next;
 
-	// Get products by category
-	@GetMapping("/category/{category}")
-	public ResponseEntity<?> getProductsByCategory(@PathVariable String category) {
-	    try {
-	        List<Product> products = this.productService.getProductsByCategory(category);
-	        return ResponseEntity.ok(products);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	            .body("Error retrieving products by category: " + e.getMessage());
-	    }
-	}
+    public SearchResponse(List<SearchResult> results, int total_count, int offset, int limit, boolean has_next) {
+        this.results = results;
+        this.total_count = total_count;
+        this.offset = offset;
+        this.limit = limit;
+        this.has_next = has_next;
+    }
 
-	// Get products by brand
-	@GetMapping("/brand/{brand}")
-	public ResponseEntity<?> getProductsByBrand(@PathVariable String brand) {
-	    try {
-	        List<Product> products = this.productService.getProductsByBrand(brand);
-	        return ResponseEntity.ok(products);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	            .body("Error retrieving products by brand: " + e.getMessage());
-	    }
-	}
-
-	// Search products by name
-	@GetMapping("/search")
-	public ResponseEntity<?> searchProductsByName(@RequestParam String name) {
-	    try {
-	        List<Product> products = this.productService.searchProductsByName(name);
-	        return ResponseEntity.ok(products);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	            .body("Error searching products: " + e.getMessage());
-	    }
-	}
-
-	// Update product
-	@PutMapping("/{id}")
-	public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
-	    try {
-	        Product updatedProduct = this.productService.updateProduct(id, productDetails);
-	        return ResponseEntity.ok(updatedProduct);
-	    } catch (RuntimeException e) {
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	            .body("Product not found with id: " + id);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	            .body("Error updating product: " + e.getMessage());
-	    }
-	}
-
-	// Delete product
-	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
-	    try {
-	        this.productService.deleteProduct(id);
-	        return ResponseEntity.ok("Product deleted successfully");
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	            .body("Error deleting product: " + e.getMessage());
-	    }
-	}
+    // Getters
+    public List<SearchResult> getResults() { return results; }
+    public int getTotal_count() { return total_count; }
+    public int getOffset() { return offset; }
+    public int getLimit() { return limit; }
+    public boolean isHas_next() { return has_next; }
 }
