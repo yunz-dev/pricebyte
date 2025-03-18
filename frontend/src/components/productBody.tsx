@@ -10,7 +10,7 @@ function ProductBody() {
     price: 5.00,
     unitPrice: 0.00,
     originalPrice: 10.00,
-    availability: true,
+    availability: false,
     imageUrl: "/vite.svg",
     productUrl: "https://www.woolworths.com.au/shop/productdetails/208064",
     weight: "1L",
@@ -30,7 +30,12 @@ function ProductBody() {
     <div className="flex flex-row gap-20 mid-h-50vh py-20">{/* Product Area */}
       <img src="/vite.svg" className="w-1/2 h-full object-cover" alt="Product Image" />
       <div className="flex flex-col w-full gap-5">
-        <p className="text-2xl font-bold">{product.productName}</p>
+        {product.availability ?
+          <p className="text-2xl font-bold">{product.productName}</p> :
+          <div className="flex flex-row gap-10 items-center">
+            <p className="text-2xl font-bold">{product.productName}</p>
+            <p className="text-2xl font-bold">(OUT OF STOCK)</p>
+          </div>}
         <a href={product.productUrl} target="_blank" rel="noreferrer" 
           className="text-gray-500 transition-transform duration-300 hover:-translate-y-1 hover:font-bold">
           {product.store}
