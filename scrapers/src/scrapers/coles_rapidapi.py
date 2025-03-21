@@ -1,12 +1,13 @@
 import requests
 import time
 import json
+import os
 from typing import List, Dict, Any
 
 class ColesRapidAPIScraper:
     BASE_URL = "https://coles-product-price-api.p.rapidapi.com/coles/product-search/"
     HEADERS = {
-        "x-rapidapi-key": "311aa97b29mshebc4b36ca42182cp1bd2d0jsn0c9cc58b8b1e",
+        "x-rapidapi-key": os.getenv("RAPIDAPI_KEY", ""),
         "x-rapidapi-host": "coles-product-price-api.p.rapidapi.com"
     }
 

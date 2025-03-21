@@ -3,7 +3,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://neondb_owner:npg_pFec60LRKvsf@ep-fragrant-block-a7lnk03h-pooler.ap-southeast-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost:5432/myappdb")
 
 SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.8"))
 
