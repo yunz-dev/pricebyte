@@ -13,9 +13,36 @@ services:
       - "5431:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
       - app-network
+
+  backend:
+    build: ./backend
+    container_name: pricebyte-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/myappdb
+      DB_USERNAME: myuser
+      DB_PASSWORD: mypassword
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+
+  frontend:
+    build: ./frontend
+    container_name: pricebyte-frontend
+    restart: unless-stopped
+    environment:
+      EXTERNAL_API_URL: http://backend:8080
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - backend
 
   # Optional: pgAdmin for database management
   pgadmin:
@@ -26,7 +53,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin123
     ports:
-      - "8080:80"
+      - "8081:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     networks:

@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-db-scrapers
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: myappdb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5431:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - scrapers-network
+
+  ingest:
+    build: ./ingest
+    container_name: pricebyte-ingest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://postgres:5432/myappdb
+    ports:
+      - "8000:8000"
+    networks:
+      - scrapers-network
+    depends_on:
+      - postgres
+
+  scrapers:
+    build: ./scrapers
+    container_name: pricebyte-scrapers
+    restart: "no"
+    environment:
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+      DATABASE_URL: postgresql://postgres:5432/myappdb
+    networks:
+      - scrapers-network
+    depends_on:
+      - ingest
+
+volumes:
+  postgres_data:
+
+networks:
+  scrapers-network:
+    driver: bridge
