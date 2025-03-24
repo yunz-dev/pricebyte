@@ -6,7 +6,7 @@ services:
     container_name: pricebyte-ingest
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://neondb_owner:npg_pFec60LRKvsf@ep-fragrant-block-a7lnk03h-pooler.ap-southeast-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+      DATABASE_URL: ${DATABASE_URL}
     ports:
       - "8000:8000"
     networks:
@@ -18,7 +18,7 @@ services:
     restart: "no"
     environment:
       RAPIDAPI_KEY: ${RAPIDAPI_KEY}
-      DATABASE_URL: postgresql://neondb_owner:npg_pFec60LRKvsf@ep-fragrant-block-a7lnk03h-pooler.ap-southeast-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+      DATABASE_URL: ${DATABASE_URL}
     networks:
       - scrapers-network
     depends_on:
