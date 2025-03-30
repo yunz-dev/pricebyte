@@ -29,7 +29,10 @@ public class ProductService {
     
     @Autowired
     private PriceHistoryRepository priceHistoryRepository;
-    
+
+    @Autowired
+    private RapidAPIService rapidAPIService;
+
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
@@ -47,7 +50,18 @@ public class ProductService {
     }
     
     public List<Product> searchProductsByName(String name) {
-        return productRepository.findByNameContainingIgnoreCase(name);
+        List<Product> results = productRepository.findByNameContainingIgnoreCase(name);
+        if (results.isEmpty()) {
+            rapidAPIService.fetchAndStoreProducts(name);
+            // Wait a bit for async processing
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            results = productRepository.findByNameContainingIgnoreCase(name);
+        }
+        return results;
     }
     
     public Product createProduct(Product product) {
