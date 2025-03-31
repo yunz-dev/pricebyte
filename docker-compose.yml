@@ -21,15 +21,14 @@ services:
     container_name: pricebyte-backend
     restart: unless-stopped
     environment:
-      DATABASE_URL: jdbc:postgresql://postgres:5432/myappdb
-      DB_USERNAME: myuser
-      DB_PASSWORD: mypassword
+      DATABASE_URL: ${DATABASE_URL}
+      DB_USERNAME: neondb_owner
+      DB_PASSWORD: npg_pFec60LRKvsf
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
     ports:
       - "8080:8080"
     networks:
       - app-network
-    depends_on:
-      - postgres
 
   frontend:
     build: ./frontend
