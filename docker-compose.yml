@@ -1,21 +1,6 @@
 version: "3.8"
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: postgres-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: myappdb
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-    ports:
-      - "5431:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app-network
-
   backend:
     build: ./backend
     container_name: pricebyte-backend
@@ -43,26 +28,7 @@ services:
     depends_on:
       - backend
 
-  # Optional: pgAdmin for database management
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
-    ports:
-      - "8081:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    networks:
-      - app-network
-    depends_on:
-      - postgres
 
-volumes:
-  postgres_data:
-  pgadmin_data:
 
 networks:
   app-network:
