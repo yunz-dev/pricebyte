@@ -3,7 +3,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 
 /**
  * Interface of the props passed into PriceHistory
- */ 
+ */
 interface PriceHistoryProps {
   params: {
     priceHistory: {
@@ -14,13 +14,18 @@ interface PriceHistoryProps {
   }
 }
 
+interface ChartDataItem {
+  date: string;
+  price: number;
+}
+
 /**
  * Renders an interactive line chart showing the price history of a product over time.
  */
 export default function PriceHistory({ params }: PriceHistoryProps) {
   
   // Chart data array to hold date points and prices
-  const chartData: any[] = [];
+  const chartData: ChartDataItem[] = [];
 
   // Label that pops up on price history hover
   const HoverLabel = ({ active, payload, label }: any) => {
@@ -60,13 +65,13 @@ export default function PriceHistory({ params }: PriceHistoryProps) {
   });
   
   // Remove duplicates and sort
-  const uniqueData = chartData.reduce((acc, current) => {
-    const existing = acc.find(item => item.date === current.date);
+  const uniqueData = chartData.reduce((acc: ChartDataItem[], current) => {
+    const existing = acc.find((item: ChartDataItem) => item.date === current.date);
     if (!existing) {
       acc.push(current);
     }
     return acc;
-  }, [] as any[]);
+  }, []);
   
   uniqueData.sort((a, b) => a.date - b.date);
 
