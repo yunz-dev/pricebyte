@@ -15,7 +15,7 @@ interface PriceHistoryProps {
 }
 
 interface ChartDataItem {
-  date: string;
+  date: number;
   price: number;
 }
 
