@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -38,7 +38,7 @@ const searchCache = new Map<string, { data: SearchResponse; timestamp: number }>
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 const REQUEST_TIMEOUT = 10000; // 10 seconds
 
-export default function SearchPage() {
+function SearchPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
@@ -403,5 +403,13 @@ export default function SearchPage() {
       </div>
       <Footer />
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<SearchResultsSkeleton />}>
+      <SearchPageContent />
+    </Suspense>
   );
 }
