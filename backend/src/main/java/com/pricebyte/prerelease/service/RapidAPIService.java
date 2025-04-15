@@ -64,37 +64,45 @@ public class RapidAPIService {
     }
 
     private void saveProduct(Map<String, Object> item, String store) {
-        String name = (String) item.get(store.equals("woolworths") ? "productName" : "productName");
+        String name = (String) item.get("productName");
         String brand = (String) item.get("productBrand");
         String priceStr = item.get("currentPrice").toString();
-        double price = Double.parseDouble(priceStr);
-        String size = (String) item.get("productSize");
+        float price = Float.parseFloat(priceStr);
+        String sizeStr = (String) item.get("productSize");
+        float size = parseSize(sizeStr);
         String url = (String) item.get("url");
 
         // Create or update product
         Product product = productRepository.findByName(name).orElse(new Product());
         if (product.getId() == null) {
             product.setName(name);
-            product.setBrand(brand);
+            product.setBrand(brand != null ? brand : "");
             product.setCategory("General");
             product.setSize(size);
-            product.setCreatedAt(LocalDateTime.now());
-            product.setUpdatedAt(LocalDateTime.now());
+            product.setUnit(""); // Default
+            product.setImageUrl("");
+            product.setDescription(name);
             product = productRepository.save(product);
         }
 
         // Create store product
         StoreProduct storeProduct = new StoreProduct();
-        storeProduct.setProduct(product);
         storeProduct.setStore(store);
-        storeProduct.setStoreProductId(String.valueOf(item.get("barcode") != null ? item.get("barcode") : item.get("productId")));
-        storeProduct.setStoreName(name);
-        storeProduct.setCurrentPrice(price);
+        storeProduct.setStandardPrice(price);
         storeProduct.setProductUrl(url);
-        storeProduct.setAvailability(true);
-        storeProduct.setCreatedAt(LocalDateTime.now());
-        storeProduct.setUpdatedAt(LocalDateTime.now());
+        storeProduct.setIsActive(true);
+        storeProduct.setProduct(product);
 
         storeProductRepository.save(storeProduct);
+    }
+
+    private float parseSize(String sizeStr) {
+        if (sizeStr == null) return 0.0f;
+        try {
+            String num = sizeStr.replaceAll("[^0-9.]", "");
+            return Float.parseFloat(num);
+        } catch (NumberFormatException e) {
+            return 0.0f;
+        }
     }
 }
