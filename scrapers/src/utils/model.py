@@ -28,3 +28,13 @@ class ApiProduct(BaseModel):
 class ApiProducts(BaseModel):
     api_uses: int
     products: list[ApiProduct]
+
+
+class ColesProductV1(BaseModel):
+    id: int
+    name: str
+    brand: str
+    price: float
+    old_price: float
+    on_sale: bool
+    unit_price: float
