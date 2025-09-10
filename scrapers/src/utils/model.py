@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from typing import Optional
 
 class Product(BaseModel):
     store: str
@@ -16,6 +16,21 @@ class Product(BaseModel):
     description: str
 
 
+
+class IGAProductV1(BaseModel):
+    id: int
+    name: str
+    brand: str
+    price: float
+    old_price: float
+    on_sale: bool
+    available: bool
+    image_url: Optional[str] = None
+    unit_price: float
+    unitMeasure: str
+    unitSize: str
+
+    
 class ApiProduct(BaseModel):
     store: str
     price: float
