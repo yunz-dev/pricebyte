@@ -3,13 +3,12 @@ import time
 import requests
 from utils.model import IGAProductV1
 
-iga_categories = {
-    "fruit-and-vegetable": ["fruit", "vegetables", "salads"],
+iga_categories = [
+    "Fruit_and_Vegetable", "Pantry", "Meat_Seafood_and_Deli", "Dairy_Eggs_and_Fridge", "Bakery", 
+    "Drinks", "Frozen", "Health_and_Beauty", "Pet", "Baby", "Liquor_Food", "Household", "Other"
+]
 
-
-}
-
-def scrape_iga_category(subCategory: str):
+def scrape_iga_category(category: str, store_id = "32600"):
     """
     Scrapes all products from a given IGA category.
     Parameters:
@@ -21,7 +20,7 @@ def scrape_iga_category(subCategory: str):
     product_list = []
 
     # Construct the base URL for the API call
-    base_url = f"https://www.igashop.com.au/api/storefront/stores/32600/categories/{subCategory}/search"
+    base_url = f"https://www.igashop.com.au/api/storefront/stores/{store_id}/categories/{category}/search"
     
     curr_scraped = 0
 
@@ -49,11 +48,13 @@ def scrape_iga_category(subCategory: str):
             
             for item in results:
                 # description=item.get("description"),
-                unitOfMeasure = item.get("unitOfMeasure")
-                unitOfMeasure = f"{unitOfMeasure.get("size", "")} {unitOfMeasure.get("abbreviation") or "each"}"
+                unit_measure = item.get("unitOfMeasure")
+                unit_measure = f"{unit_measure.get("size", "")}{unit_measure.get("abbreviation") or "each"}"
 
-                unitOfSize = item.get("unitOfSize")
-                unitOfSize = f"{unitOfSize.get("size", "")} {unitOfSize.get("abbreviation") or "each"}"
+                unit_size = item.get("unitOfSize")
+                unit_size = f"{unit_size.get("size", "")}{unit_size.get("abbreviation") or "each"}"
+
+                unit_price = (item.get("pricePerUnit", "") or "").strip("$").replace("/", " ").split(" ")[0]
 
                 product = IGAProductV1(
                     id=int(item.get("productId")),
@@ -64,9 +65,9 @@ def scrape_iga_category(subCategory: str):
                     on_sale=1 if item.get("priceLabel") == "Special" else 0,
                     available=item.get("available"),
                     image_url=item.get("image", {}).get("default", ""),
-                    unit_price=float(item.get("pricePerUnit").strip("$").replace("/", " ").split(" ")[0]),
-                    unitMeasure=unitOfMeasure,
-                    unitSize=unitOfSize
+                    unit_price=float(unit_price.replace(",", "")) if unit_price else 0,
+                    unit_measure=unit_measure,
+                    unit_size=unit_size
                 )
                 product_list.append(product)
 

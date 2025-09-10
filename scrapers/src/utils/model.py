@@ -27,8 +27,8 @@ class IGAProductV1(BaseModel):
     available: bool
     image_url: Optional[str] = None
     unit_price: float
-    unitMeasure: str
-    unitSize: str
+    unit_measure: str
+    unit_size: str
 
     
 class ApiProduct(BaseModel):
