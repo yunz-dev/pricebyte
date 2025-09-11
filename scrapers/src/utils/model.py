@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from enum import Enum
 from abc import ABC, abstractmethod
 from typing import List, Tuple
+import asyncio
 
 class Product(BaseModel):
     store: str
@@ -51,6 +52,10 @@ class Scraper(ABC):
 
     @abstractmethod
     def is_new_product(self, id: int) -> bool:
+        pass
+
+    @abstractmethod
+    def get_store_name(self) -> str:
         pass
 
 
