@@ -48,15 +48,17 @@ def scrape_iga_category(category: str, store_id = "32600"):
             
             for item in results:
                 # description=item.get("description"),
-                unit_measure = item.get("unitOfMeasure")
-                unit_measure = f"{unit_measure.get("size", "")}{unit_measure.get("abbreviation") or "each"}"
+                unit_measure_json = item.get("unitOfMeasure")
+                unit_measure = f"{unit_measure_json.get("size", "")}{unit_measure_json.get("abbreviation") or "each"}"
 
-                unit_size = item.get("unitOfSize")
-                unit_size = f"{unit_size.get("size", "")}{unit_size.get("abbreviation") or "each"}"
+                unit_size_json = item.get("unitOfSize")
+                unit_size = f"{unit_size_json.get("size", "")}{unit_size_json.get("abbreviation") or "each"}"
 
-                unit_price = (item.get("pricePerUnit", "") or "").strip("$").replace("/", " ").split(" ")[0]
+                # unit_price looks like $1,000/100mL or $100 each
+                unit_price = (item.get("pricePerUnit", "") or "").strip("$").replace("/", " ").split(" ")[0].replace(",", "")
 
                 product = IGAProductV1(
+                    store=f"iga-{store_id}",
                     id=int(item.get("productId")),
                     name=item.get("name"),
                     brand=item.get("brand"),
@@ -65,13 +67,14 @@ def scrape_iga_category(category: str, store_id = "32600"):
                     on_sale=1 if item.get("priceLabel") == "Special" else 0,
                     available=item.get("available"),
                     image_url=item.get("image", {}).get("default", ""),
-                    unit_price=float(unit_price.replace(",", "")) if unit_price else 0,
+                    unit_price=float(unit_price) if unit_price else 0,
                     unit_measure=unit_measure,
                     unit_size=unit_size
                 )
                 product_list.append(product)
 
             if total_results != 100:
+                print(f"Finished scraping {total_results} products")
                 break
 
             curr_scraped += total_results

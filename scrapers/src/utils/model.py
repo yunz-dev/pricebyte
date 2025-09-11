@@ -18,6 +18,7 @@ class Product(BaseModel):
 
 
 class IGAProductV1(BaseModel):
+    store: str
     id: int
     name: str
     brand: str
