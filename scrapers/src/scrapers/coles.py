@@ -65,6 +65,7 @@ def scrape_coles_category(category_name="deli") -> list[ColesProductV1]:
                     pricing = item.get('pricing') or {}
                     unit_pricing = pricing.get('unit', {})
                     product = ColesProductV1(
+                        store="coles",
                         id=item.get("id"),
                         name=item.get("name"),
                         brand=item.get("brand", "N/A"),
