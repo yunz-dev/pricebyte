@@ -1,104 +1,67 @@
-from fastapi import FastAPI
-
-from scrapers.woolies import get_data
-from scrapers.iga import get_iga_product
-from scrapers.aldi import scrape_product
-from api.coles_woolies import query_products
-
-app = FastAPI(
-    title="PriceByte Scraping API",
-    description="Scrape Woolies, Coles and Aldi",
-    version="0.1.0",
-    contact={
-        "name": "yunz-dev",
-    },
-    license_info={
-        "name": "GNU GPL v3.0",
-        "url": "https://www.gnu.org/licenses/gpl-3.0.en.html",
-    },
-)
+from utils.model import Scraper
+from typing import List, Tuple
 
 
-@app.get("/heart")
-def heart():
-    return {"message": "healthy"}
+def main():
+    scraper_list = [
+        # Add scrapers here
+    ]
+
+    stores = category_scrape(scraper_list)
+
+    for i, product_list in enumerate(stores):
+        product_scrape(scraper_list[i], product_list)
+
+    for i, product_list in enumerate(stores):
+        product_price_check(scraper_list[i], product_list)
 
 
-@app.get("/woolies-store/id/{product_id}")
-def get_woolies_store_by_id(product_id: int):
-    """
+def category_scrape(scraper_list: List[Scraper]) -> List[List[Tuple[int, float]]]:
+    stores = []
 
-    Parameters:
-    - **product_id** (int): the id of the woolies product
+    for scraper in scraper_list:
+        print(f"Scraping {scraper.get_store_name()}")
+        stores.append(scraper.scrape_category())
 
-    Returns:
-    - **json**: product details
-
-    #### NOTE: API has a ~5 second delay due to scraping limitations
-    """
-    return get_data(product_id)
-
-@app.get("/iga-store/store/{store_id}/id/{product_id}")
-def get_iga_product_by_id(product_id: int, store_id: int):
-    """
-
-    Parameters:
-    - **product_id** (int): the id of the iga product
-
-    Returns:
-    - **json**: product details
-    """
-    return get_iga_product(product_id, store_id)
-
-@app.get("/aldi-store/page")
-def get_aldi_product_by_url(product_page: str):
-    """
-
-    Parameters:
-    - **product_url** (string): the url of the aldi product
-
-    Returns:
-    - **json**: product details
-    """
-    return scrape_product(product_page)
+    return stores
 
 
-@app.get("/woolies-store/api/{product_name}")
-def get_woolies_api_product_by_name(product_name: str):
-    """
+# List here is a list of product models
+def product_scrape(scraper: Scraper, product_list: List[Tuple[int, float]]) -> List:
+    products = []
 
-    Parameters:
-    - **product_name** (str): the name of the woolies product
+    for id, _ in product_list:
+        if scraper.is_new_product(id):
+            send_to_scala(scraper.scrape_product(id))
 
-    Returns:
-    - **json**: list of products
-
-    """
-    return query_products("Woolies Store", product_name)
+    return products
 
 
-@app.get("/coles-store/api/{product_name}")
-def get_coles_product_by_name(product_name: str):
-    """
+def product_price_check(
+    scraper: Scraper, product_list: List[Tuple[int, float]]
+) -> List[Tuple[int, float]]:
+    products = []
+    for id, price in product_list:
+        if scraper.price_changed((id, price)):
+            send_to_spring((scraper.get_store_name(), id, price))
 
-    Parameters:
-    - **product_name** (str): the name of the coles product
-
-    Returns:
-    - **json**: list of products
-
-    """
-    return query_products("Coles Store", product_name)
+    return products
 
 
-# NOTE: USELESS
-# @app.get("/woolies-store/page/")
-# def get_woolies_store_by_page(product_page: str):
-#     """
-#     Returns product details in json
-#     Parameters:
-#     - product page
-#     Returns:
-#     - json: product details
-#     """
-#     return get_data_from_url(product_page)
+def send_to_spring(data) -> bool:
+    raise NotImplementedError
+
+
+def send_to_scala(data) -> bool:
+    raise NotImplementedError
+
+
+if __name__ == "__main__":
+    main()
+
+
+# run a category scraper
+# check each id with sqlite
+# return a list a price_updates
+# have a list of new_product_ids
+
