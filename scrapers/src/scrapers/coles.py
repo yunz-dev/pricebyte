@@ -70,7 +70,7 @@ class ColesScraper(Scraper):
                         if item.get('_type') == 'PRODUCT':
                             priceUpdate = PriceUpdates(
                                 store_product_id=item.get("id"),
-                                store="Woolworths",
+                                store="Coles",
                                 new_price=(item.get('pricing') or {}).get("now")
                             )
                             price_update_list.append(priceUpdate)
