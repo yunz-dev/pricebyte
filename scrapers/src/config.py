@@ -14,7 +14,8 @@ def parse_and_set_env():
     # Database group
     db_group = parser.add_mutually_exclusive_group()
     db_group.add_argument("-s", action="store_true", help="SQLite database")
-    db_group.add_argument("-p", action="store_true", help="Production database")
+    db_group.add_argument("-p", action="store_true",
+                          help="Production database")
 
     # Mode group
     mode_group = parser.add_mutually_exclusive_group()
@@ -54,6 +55,10 @@ def is_quiet():
 
 def is_verbose():
     return get_log_level() == "verbose"
+
+
+def is_production():
+    return get_database() == "production"
 
 
 def is_sqlite():
