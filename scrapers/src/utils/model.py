@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from enum import Enum
 from abc import ABC, abstractmethod
 from typing import List, Tuple
-import asyncio
 
 class Product(BaseModel):
     store: str
@@ -34,20 +33,35 @@ class ApiProducts(BaseModel):
 
 # --------------------- Version 2 Models ---------------------
 
+class Store(str, Enum):
+    ALDI = "ALDI"
+    Woolworths = "Woolworths"
+    Coles = "Coles"
+    IGA = "IGA"
+
+
+class PriceUpdates(BaseModel):
+    store_product_id: int
+    store: Store
+    new_price: int
+
+
 class Scraper(ABC):
 
+    def __init__(self, category_list):
+        self.category_list = category_list
+
     @abstractmethod
-    def scrape_category(self) -> List[Tuple[int, float]]:
+    def scrape_category(self) -> List[PriceUpdates]:
         # a list of (store_product_id, new_price)
         pass
 
     @abstractmethod
-    def scrape_product(self, id: int) -> bool:
-        # returns success/failure
+    def scrape_product(self, id: int) -> Product:
         pass
 
     @abstractmethod
-    def price_changed(self, product: Tuple[int, float]) -> bool:
+    def price_changed(self, product: PriceUpdates) -> bool:
         pass
 
     @abstractmethod
@@ -57,20 +71,7 @@ class Scraper(ABC):
     @abstractmethod
     def get_store_name(self) -> str:
         pass
-
-
-class Store(str, Enum):
-    ALDI = "ALDI"
-    Woolworths = "Woolworths"
-    Coles = "Coles"
-    IGA = "IGA"
-
-class PriceUpdates(BaseModel):
-    store_product_id: int
-    store: Store
-    new_price: int
-
-
+    
 
 class ColesProductV1(BaseModel):
     store: str
