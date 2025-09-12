@@ -63,7 +63,7 @@ class ProductInfo(BaseModel):
 
 class Scraper(ABC):
     @abstractmethod
-    def scrape_category(self) -> List[Tuple[int, float]]:
+    def scrape_category(self) -> List[PriceUpdates]:
         # a list of (store_product_id, new_price)
         pass
 
@@ -71,10 +71,12 @@ class Scraper(ABC):
     def scrape_product(self, product: PriceUpdates) -> ProductInfo:
         pass
 
+    # might be useless lol
     @abstractmethod
     def price_changed(self, product: PriceUpdates) -> bool:
         pass
 
+    # might be useless lol
     @abstractmethod
     def is_new_product(self, product: PriceUpdates) -> bool:
         pass

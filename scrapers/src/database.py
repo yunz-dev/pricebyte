@@ -38,11 +38,17 @@ class ComplexProduct(Base):
 # Main database (only simple products)
 class MainDatabase:
     def __init__(self, db_name: str = "main", echo: bool = False):
-        self.db_name = db_name
-        self.engine = create_engine(
-            f"sqlite:///sqlite/{db_name}.db", echo=echo)
-        self.Session = sessionmaker(bind=self.engine)
-        self._setup_database()
+        try:
+            self.db_name = db_name
+            self.engine = create_engine(
+                f"sqlite:///sqlite/{db_name}.db", echo=echo)
+            self.Session = sessionmaker(bind=self.engine)
+            self._setup_database()
+        except:
+            print(
+                "vickles you silly billy... you gotta create the `sqlite/` directory first!!"
+            )
+            exit(1)
 
     def _setup_database(self):
         """Setup main database with only simple_products table"""
@@ -204,11 +210,17 @@ class MainDatabase:
 # Mock database (both simple and complex products)
 class MockDatabase:
     def __init__(self, db_name: str = "mock", echo: bool = False):
-        self.db_name = db_name
-        self.engine = create_engine(
-            f"sqlite:///sqlite/{db_name}.db", echo=echo)
-        self.Session = sessionmaker(bind=self.engine)
-        self._setup_database()
+        try:
+            self.db_name = db_name
+            self.engine = create_engine(
+                f"sqlite:///sqlite/{db_name}.db", echo=echo)
+            self.Session = sessionmaker(bind=self.engine)
+            self._setup_database()
+        except:
+            print(
+                "vickles you silly billy... you gotta create the `sqlite/` directory first!!"
+            )
+            exit(1)
 
     def _setup_database(self):
         """Setup mock database with both simple_products and products tables"""
