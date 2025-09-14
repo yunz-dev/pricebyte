@@ -1,7 +1,7 @@
-import requests
 import time
 from typing import List
 from math import ceil
+import requests
 from utils.model import Scraper, PriceUpdates, ProductInfo, Store
 from log import log, detailed_log
 
@@ -12,22 +12,23 @@ class ColesScraper(Scraper):
         self.base_url = f"https://www.coles.com.au/_next/data/{self.build_id}/en/browse/"
         self.detail_url = f"https://www.coles.com.au/_next/data/{self.build_id}/en/product/"
         self.limit = 48
-        self.headers = headers = {
+        self.headers = {
             'Accept': '*/*',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
             'x-nextjs-data': '1'
         }
         self.categories = {
-            "Meat and Seafood": "meat-seafood", "Fruit and Vegtables": "fruit-vegetables", "Dairy Eggs and Fridge": "dairy-eggs-fridge", 
-            "Bakery": "bakery", "Deli Foods": "deli", "Pantry": "pantry", "Dietary World Foods": "dietary-world-foods", 
-            "Snacks and Chocolates": "chips-chocolates-snacks", "Drinks": "drinks", "Frozen": "frozen", "Household": "household", 
-            "Health and Beauty": "health-beauty", "Baby": "baby", "Pet": "pet", "Liquorland": "liquorland", "Tobacco": "tobacco"
+            "Meat and Seafood": "meat-seafood", "Fruit and Vegtables": "fruit-vegetables", 
+            "Dairy Eggs and Fridge": "dairy-eggs-fridge", "Bakery": "bakery", "Deli Foods": "deli", 
+            "Pantry": "pantry", "Dietary World Foods": "dietary-world-foods", 
+            "Snacks and Chocolates": "chips-chocolates-snacks", "Drinks": "drinks", 
+            "Frozen": "frozen", "Household": "household", "Health and Beauty": "health-beauty", 
+            "Baby": "baby", "Pet": "pet", "Liquorland": "liquorland", "Tobacco": "tobacco"
         }
 
     def scrape_category(self) -> List[PriceUpdates]:
         """Scrape all categories and return a list of PriceUpdates"""
         all_products = []
-        
         for cat_name, cat_key in self.categories.items():
             log(f"🗂️  Category: {cat_name} ({cat_key})")
 
@@ -70,7 +71,7 @@ class ColesScraper(Scraper):
                             priceUpdate = PriceUpdates(
                                 store_product_id=item.get("id"),
                                 product_name=item.get("name"),
-                                store="Coles",
+                                store=Store.Coles,
                                 price=(item.get('pricing') or {}).get("now") or -1
                             )
                             print(priceUpdate)
@@ -93,15 +94,85 @@ class ColesScraper(Scraper):
         return all_products
 
     def scrape_product(self, product: PriceUpdates) -> ProductInfo:
-        return None
-    
+        """Fetch detailed information for a specific product"""
+
+        try:
+            product_name_url = "-".join(product.product_name.replace("|", "").split())
+            url = f"{self.detail_url}/{product_name_url}-{product.store_product_id}.json?slug={product_name_url}-{product.store_product_id}"
+
+            response = requests.get(
+                url, headers=self.headers, timeout=10
+            )
+
+            if not response.ok:
+                log(f"❌ HTTP Error for product id {product.store_product_id}: {response.status_code}")
+                return ProductInfo(
+                    store_product_id=product.store_product_id,
+                    store=product.store,
+                    product_name=product.product_name,
+                    price=product.price,
+                    details={},
+                )
+
+            product_data = response.json().get("pageProps", {}).get("product")
+
+            details = {
+                "name": product_data.get("name"),
+                "brand": product_data.get("brand"),
+                "description": product_data.get("longDescription"),
+                "size": product_data.get("size"),
+                "unit_price": product_data.get("pricing", {}).get("unit", {}).get("price") or -1,
+                "unit_size": product_data.get("pricing", {}).get("unit", {}).get("ofMeasureQuantity") or -1,
+                "unit_measure": product_data.get("pricing", {}).get("unit", {}).get("ofMeasureUnits") or -1,
+                "allergens": [x["description"] for x in product_data.get("additionalInfo") if x["title"] == "Allergens"],
+                "ingredients": [x["description"] for x in product_data.get("additionalInfo") if x["title"] == "Ingredients"],
+                "storage": [x["description"] for x in product_data.get("additionalInfo") if x["title"] == "Storage instructions"],
+                "dimensions": [x["description"] for x in product_data.get("additionalInfo") if x["title"] == "Dimensions"],
+                "country_of_origin": product_data.get("countryOfOrigin", {}).get("country", ""),
+                "categories": [
+                    cat.get("subCategory") for cat in product_data.get("onlineHeirs", [])
+                ],
+                "image_urls": [ 
+                    f"https://shop.coles.com.au/{image.get("full", {}).get("path")}" for image in product_data.get("images", [])
+                ],
+            }
+
+            current_price = product.price
+            if product_data.get("price", {}).get("amountRelevantDisplay"):
+                try:
+                    api_price = float(product_data.get("pricing", {}).get("now") or -1)
+                    current_price = api_price
+                except (ValueError, AttributeError):
+                    pass
+
+            return ProductInfo(
+                store_product_id=product.store_product_id,
+                store=product.store,
+                product_name=product_data.get("name", product.product_name),
+                price=current_price,
+                details=details,
+            )
+
+        except Exception as e:
+            log(f"❌ Exception for product id {product.store_product_id}: {e}")
+            return ProductInfo(
+                store_product_id=product.store_product_id,
+                store=product.store,
+                product_name=product.product_name,
+                price=product.price,
+                details={},
+            )  
+
     def price_changed(self, product: PriceUpdates) -> bool:
+        """Redundant"""
         return False
 
     def is_new_product(self, product: PriceUpdates) -> bool:
+        """Redundant"""
         return False
 
     def get_store_name(self) -> str:
+        """Returns the supermarket name"""
         return "Coles"
 
 
