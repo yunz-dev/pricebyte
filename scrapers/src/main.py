@@ -1,6 +1,7 @@
 from database import MainDatabase, MockDatabase
 from mockscraper import MockScraperAldi
 from scrapers.aldiV2 import AldiScraper
+from scrapers.colesV2 import ColesScraper
 
 # still not working i fix later ->>>>
 # from scrapers.wooliesV2 import WoolworthsScraper
@@ -23,7 +24,7 @@ def main():
         if is_mock()
         else [
             AldiScraper(),
-            # WoolworthsScraper()
+            ColesScraper()
             # Add real scrapers here
         ]
     )
