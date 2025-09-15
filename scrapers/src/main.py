@@ -1,104 +1,135 @@
-from fastapi import FastAPI
+from database import MainDatabase, MockDatabase
+from mockscraper import MockScraperAldi
+from scrapers.aldiV2 import AldiScraper
+from scrapers.colesV2 import ColesScraper
 
-from scrapers.woolies import get_data
-from scrapers.iga import get_iga_product
-from scrapers.aldi import scrape_product
-from api.coles_woolies import query_products
+# still not working i fix later ->>>>
+# from scrapers.wooliesV2 import WoolworthsScraper
+from utils.model import PriceUpdates, ProductInfo, Scraper
+from typing import List
+from config import is_production, parse_and_set_env, is_mock
+from log import log, detailed_log
 
-app = FastAPI(
-    title="PriceByte Scraping API",
-    description="Scrape Woolies, Coles and Aldi",
-    version="0.1.0",
-    contact={
-        "name": "yunz-dev",
-    },
-    license_info={
-        "name": "GNU GPL v3.0",
-        "url": "https://www.gnu.org/licenses/gpl-3.0.en.html",
-    },
-)
+main_db = MainDatabase()
+test_db = MockDatabase()
 
 
-@app.get("/heart")
-def heart():
-    return {"message": "healthy"}
+def main():
+    parse_and_set_env()
+    scraper_list = (
+        [
+            # Add Mock Scrapers here
+            MockScraperAldi()
+        ]
+        if is_mock()
+        else [
+            AldiScraper(),
+            ColesScraper()
+            # Add real scrapers here
+        ]
+    )
+
+    stores = category_scrape(scraper_list)
+
+    for i, product_list in enumerate(stores):
+        product_scrape(scraper_list[i], product_list)
+
+    for i, product_list in enumerate(stores):
+        product_price_check(scraper_list[i], product_list)
+
+    log("SUCCESS ==========================================")
 
 
-@app.get("/woolies-store/id/{product_id}")
-def get_woolies_store_by_id(product_id: int):
+# i took away type hints temporarily for this cuz linter was going crazy
+# def category_scrape(scraper_list: List[Scraper]) -> List[List[PriceUpdates]]:
+def category_scrape(scraper_list) -> List[List[PriceUpdates]]:
+    log("scraping categories")
+    stores = []
+
+    for scraper in scraper_list:
+        log(f"Scraping {scraper.get_store_name()}")
+        stores.append(scraper.scrape_category())
+
+    return stores
+
+
+# List here is a list of product models
+def product_scrape(scraper: Scraper, product_list: List[PriceUpdates]) -> int:
     """
-
-    Parameters:
-    - **product_id** (int): the id of the woolies product
-
-    Returns:
-    - **json**: product details
-
-    #### NOTE: API has a ~5 second delay due to scraping limitations
+    returns number of producst scraped and sent to scala
     """
-    return get_data(product_id)
-
-@app.get("/iga-store/store/{store_id}/id/{product_id}")
-def get_iga_product_by_id(product_id: int, store_id: int):
-    """
-
-    Parameters:
-    - **product_id** (int): the id of the iga product
-
-    Returns:
-    - **json**: product details
-    """
-    return get_iga_product(product_id, store_id)
-
-@app.get("/aldi-store/page")
-def get_aldi_product_by_url(product_page: str):
-    """
-
-    Parameters:
-    - **product_url** (string): the url of the aldi product
-
-    Returns:
-    - **json**: product details
-    """
-    return scrape_product(product_page)
+    log(f"scraping products for {scraper.get_store_name()}")
+    products_added = 0
+    for product in product_list:
+        store, id, name, price = (
+            product.store,
+            product.store_product_id,
+            product.product_name,
+            product.price,
+        )
+        if main_db.add_simple_product(store, id, name, price):
+            productInfo = scraper.scrape_product(product)
+            send_to_data_processer(productInfo)
+            products_added += 1
+    log(f"successfully added: {products_added} products")
+    return products_added
 
 
-@app.get("/woolies-store/api/{product_name}")
-def get_woolies_api_product_by_name(product_name: str):
-    """
+def product_price_check(scraper: Scraper, product_list: List[PriceUpdates]) -> int:
+    log(f"checking prices for {scraper.get_store_name()}")
 
-    Parameters:
-    - **product_name** (str): the name of the woolies product
+    prices_changed = 0
+    for product in product_list:
+        store, id, price = (
+            product.store, product.store_product_id, product.price)
+        if main_db.check_price(store, id, price):
+            update_price_remote(product)
+            prices_changed += 1
 
-    Returns:
-    - **json**: list of products
-
-    """
-    return query_products("Woolies Store", product_name)
-
-
-@app.get("/coles-store/api/{product_name}")
-def get_coles_product_by_name(product_name: str):
-    """
-
-    Parameters:
-    - **product_name** (str): the name of the coles product
-
-    Returns:
-    - **json**: list of products
-
-    """
-    return query_products("Coles Store", product_name)
+    log(f"successfully changed: {prices_changed} prices")
+    return prices_changed
 
 
-# NOTE: USELESS
-# @app.get("/woolies-store/page/")
-# def get_woolies_store_by_page(product_page: str):
-#     """
-#     Returns product details in json
-#     Parameters:
-#     - product page
-#     Returns:
-#     - json: product details
-#     """
-#     return get_data_from_url(product_page)
+# TODO:
+# change logs to detailed logs later
+def send_to_data_processer(data: ProductInfo):
+    id, store, name, price, details = (
+        data.store_product_id,
+        data.store,
+        data.product_name,
+        data.price,
+        data.details,
+    )
+    if is_production():
+        send_to_scala(data)
+        log(f"successfully sent product: {store}:{id} to scala")
+    else:
+        test_db.upsert_complex_product(store, id, name, price, details)
+        log(f"successfully sent product: {store}:{id} to MockDB")
+
+
+def update_price_remote(data: PriceUpdates):
+    id, store, name, price = (
+        data.store_product_id,
+        data.store,
+        data.product_name,
+        data.price,
+    )
+    if is_production():
+        send_to_spring(data)
+        log(f"successfully updated product price for: {store}:{id} via spring")
+    else:
+        log(f"successfully updated product price for: {store}:{id} via MockDB")
+        test_db.upsert_simple_product(store, id, name, price)
+
+
+def send_to_spring(data) -> bool:
+    raise NotImplementedError
+
+
+def send_to_scala(data) -> bool:
+    raise NotImplementedError
+
+
+if __name__ == "__main__":
+    main()
