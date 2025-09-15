@@ -4,6 +4,7 @@ from math import ceil
 import requests
 from utils.model import Scraper, PriceUpdates, ProductInfo, Store
 from log import log, detailed_log
+import re
 
 
 class ColesScraper(Scraper):
@@ -75,7 +76,7 @@ class ColesScraper(Scraper):
                                 store=Store.Coles,
                                 price=(item.get('pricing') or {}).get("now") or -1
                             )
-                            print(priceUpdate)
+                            log(priceUpdate)
                             all_products.append(priceUpdate)
                     detailed_log(
                         f"  • grabbed {len(items):2}  (page={
@@ -98,7 +99,7 @@ class ColesScraper(Scraper):
         """Fetch detailed information for a specific product"""
 
         try:
-            product_name_url = "-".join(product.product_name.replace("|", "").lower().split())
+            product_name_url = "-".join(re.sub(r'[|&]', "", product.product_name).lower().split())
             log(product_name_url)
             url = f"{self.detail_url}{product_name_url}-{product.store_product_id}.json?slug={product_name_url}-{product.store_product_id}"
             response = requests.get(
