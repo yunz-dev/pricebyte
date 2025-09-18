@@ -14,6 +14,7 @@ interface ProductPageProps {
 }
 
 interface StoreProduct {
+  storeProductId: number;
   store: string;
   price: number;
   productUrl: string;
@@ -45,7 +46,7 @@ export default function Product({ params }: ProductPageProps) {
   // const productData: ProductData = await response.json();
 
   const productData: Product = {
-    "productId": 2,
+    "productId": 32102,
     "name": "Coca-Cola Soft Drink Coke | 2L",
     "brand": "Coca-Cola",
     "category": "Drinks",
@@ -67,6 +68,7 @@ export default function Product({ params }: ProductPageProps) {
     },
     "storeProducts": [
       {
+        "storeProductId": 38121,
         "store": "Woolworths",
         "price": 3.5,
         "productUrl": "https://www.woolworths.com.au/shop/productdetails/38121",
@@ -79,6 +81,7 @@ export default function Product({ params }: ProductPageProps) {
         ]
       },
       {
+        "storeProductId": 191736,
         "store": "Coles",
         "price": 3.8,
         "productUrl": "https://www.coles.com.au/product/coca-cola-soft-drink-coke-2l-191736",
@@ -87,13 +90,27 @@ export default function Product({ params }: ProductPageProps) {
           [new Date('2024-01-16'), new Date('2024-02-10'), 2.25],
           [new Date('2024-02-11'), new Date('2024-03-05'), 2.75],
           [new Date('2024-03-06'), new Date('2024-03-20'), 3.00],
-          [new Date('2024-03-21'), new Date('2024-04-15'), 2.90],
+          [new Date('2024-03-21'), new Date('2024-04-15'), 3.8],
+        ]
+      },
+      {
+        "storeProductId": 14570,
+        "store": "IGA",
+        "price": 3.85,
+        "productUrl": "https://www.igashop.com.au/product/coca-cola-classic-soft-drink-bottle-14570",
+        "priceHistory": [
+          [new Date('2024-04-05'), new Date('2024-04-18'), 2.99],
+          [new Date('2024-04-19'), new Date('2024-05-05'), 2.70],
+          [new Date('2024-05-06'), new Date('2024-05-25'), 3.05],
+          [new Date('2024-05-26'), new Date('2024-06-10'), 2.55],
+          [new Date('2024-06-11'), new Date('2024-06-30'), 3.85],
         ]
       },
     ]
   }
 
   const [currStoreProduct, setCurrStoreProduct] = useState<StoreProduct>(productData["storeProducts"][0])
+  const minPrice: number = Math.min(...productData.storeProducts.map(storeProduct => storeProduct.price));
 
   const handleStoreClick = (storeProduct: StoreProduct) => {
     if (currStoreProduct && currStoreProduct.store === storeProduct.store) {
@@ -112,24 +129,26 @@ export default function Product({ params }: ProductPageProps) {
           <div className="flex justify-center items-center" >
             <Image src={productData.imageUrl} alt={productData.name} width={500} height={500}/>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             <CardHeader>
-              <div className="flex flex-row gap-2">
+              <div className="flex flex-row items-center gap-2">
                 {productData.storeProducts.map((storeProduct, index) => (
-                  <span
+                  <div
                     key={index}
                     onClick={() => handleStoreClick(storeProduct)}
                     className={`
-                      cursor-pointer text-sm font-semibold py-2 px-4 rounded-full
+                      flex flex-row gap-1 cursor-pointer text-sm font-semibold py-2 px-4 rounded-full
                       transition-all duration-300 ease-in-out
                       ${currStoreProduct.store === storeProduct.store
                         ? 'shadow-lg bg-gray-300 transition-transform hover:bg-gray-400 hover:-translate-y-1'
                         : 'shadow-lg transition-transform hover:bg-gray-200 hover:-translate-y-1'
                       }
-                    `}
-                  >
-                    {storeProduct.store}
-                  </span>
+                    `}>
+                    <span>{storeProduct.store}</span>
+                    {storeProduct.price === minPrice && 
+                      <Image src="/Gold Medal.svg" alt="Medal" width={20} height={20}/>
+                    }
+                  </div>
                 ))}
               </div>
               <CardTitle className="text-3xl">{productData.name}</CardTitle>
