@@ -152,9 +152,10 @@ export default function Product({ params }: ProductPageProps) {
                 ))}
               </div>
               <CardTitle className="text-3xl">{productData.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
               <p className="text-xl font-bold">${currStoreProduct.price.toFixed(2)}</p>
+            </CardHeader>
+            <CardContent className="flex flex-col mt-5">
+              <p>{productData.description}</p>
             </CardContent>
           </div>
         </Card>
