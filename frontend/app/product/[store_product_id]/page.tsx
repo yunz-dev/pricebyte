@@ -138,10 +138,10 @@ export default function Product({ params }: ProductPageProps) {
                     onClick={() => handleStoreClick(storeProduct)}
                     className={`
                       flex flex-row gap-1 cursor-pointer text-sm font-semibold py-2 px-4 rounded-full
-                      transition-all duration-300 ease-in-out
+                      shadow-xl transition-transform duration-300 ease-in-out
                       ${currStoreProduct.store === storeProduct.store
-                        ? 'shadow-lg bg-gray-300 transition-transform hover:bg-gray-400 hover:-translate-y-1'
-                        : 'shadow-lg transition-transform hover:bg-gray-200 hover:-translate-y-1'
+                        ? 'bg-gray-300 transition-transform hover:bg-gray-400 hover:-translate-y-1'
+                        : 'transition-transform hover:bg-gray-200 hover:-translate-y-1'
                       }
                     `}>
                     <span>{storeProduct.store}</span>
