@@ -129,12 +129,13 @@ export default function Product({ params }: ProductPageProps) {
     <div className="w-full bg-gray-300">
       <Header/>
       <div className="flex flex-col items-center justify-center w-full min-h-svh px-20 mt-10">
-        {/* Product Image and Name */}
         <Card className="grid grid-cols-2 w-full h-full mb-10">
+          {/* Product Image */}
           <div className="flex justify-center items-center" >
             <Image src={productData.imageUrl} alt={productData.name} width={500} height={500}/>
           </div>
           <div className="flex flex-col gap-3">
+            {/* Store Options */}
             <CardHeader>
               <div className="flex flex-row items-center gap-2 mb-5">
                 {productData.storeProducts.map((storeProduct, index) => (
@@ -156,10 +157,12 @@ export default function Product({ params }: ProductPageProps) {
                   </div>
                 ))}
               </div>
+              {/* Product Name and Price */}
               <CardTitle className="text-3xl">{productData.name}</CardTitle>
               <p className="text-xl font-bold">${currStoreProduct.standardPrice.toFixed(2)}</p>
             </CardHeader>
-            <CardContent className="flex flex-col mt-5">
+            {/* Product Description */}
+            <CardContent className="flex flex-col mt-5 mr-15">
               <p>{productData.description}</p>
             </CardContent>
           </div>
