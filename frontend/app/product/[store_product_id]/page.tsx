@@ -16,9 +16,13 @@ interface ProductPageProps {
 interface StoreProduct {
   storeProductId: number;
   store: string;
-  price: number;
+  standardPrice: number;
   productUrl: string;
-  priceHistory: [Date, Date, number][];
+  priceHistory: {
+    start_date: string;
+    end_date: string;
+    price: number;
+  }[];
 }
 
 interface Product {
@@ -70,47 +74,47 @@ export default function Product({ params }: ProductPageProps) {
       {
         "storeProductId": 38121,
         "store": "Woolworths",
-        "price": 3.5,
+        "standardPrice": 3.5,
         "productUrl": "https://www.woolworths.com.au/shop/productdetails/38121",
         "priceHistory": [
-          [new Date('2024-04-05'), new Date('2024-04-18'), 2.99],
-          [new Date('2024-04-19'), new Date('2024-05-05'), 2.70],
-          [new Date('2024-05-06'), new Date('2024-05-25'), 3.05],
-          [new Date('2024-05-26'), new Date('2024-06-10'), 2.55],
-          [new Date('2024-06-11'), new Date('2024-06-30'), 3.50],
+          { "start_date": "2024-04-05T00:00:00.000Z", "end_date": "2024-04-18T00:00:00.000Z", "price": 2.99 },
+          { "start_date": "2024-04-19T00:00:00.000Z", "end_date": "2024-05-05T00:00:00.000Z", "price": 2.70 },
+          { "start_date": "2024-05-06T00:00:00.000Z", "end_date": "2024-05-25T00:00:00.000Z", "price": 3.05 },
+          { "start_date": "2024-05-26T00:00:00.000Z", "end_date": "2024-06-10T00:00:00.000Z", "price": 2.55 },
+          { "start_date": "2024-06-11T00:00:00.000Z", "end_date": "2024-06-30T00:00:00.000Z", "price": 3.50 }
         ]
       },
       {
         "storeProductId": 191736,
         "store": "Coles",
-        "price": 3.8,
+        "standardPrice": 3.8,
         "productUrl": "https://www.coles.com.au/product/coca-cola-soft-drink-coke-2l-191736",
         "priceHistory": [
-          [new Date('2024-01-01'), new Date('2024-01-15'), 2.50],
-          [new Date('2024-01-16'), new Date('2024-02-10'), 2.25],
-          [new Date('2024-02-11'), new Date('2024-03-05'), 2.75],
-          [new Date('2024-03-06'), new Date('2024-03-20'), 3.00],
-          [new Date('2024-03-21'), new Date('2024-04-15'), 3.8],
+          { "start_date": "2024-01-01T00:00:00.000Z", "end_date": "2024-01-15T00:00:00.000Z", "price": 2.50 },
+          { "start_date": "2024-01-16T00:00:00.000Z", "end_date": "2024-02-10T00:00:00.000Z", "price": 2.25 },
+          { "start_date": "2024-02-11T00:00:00.000Z", "end_date": "2024-03-05T00:00:00.000Z", "price": 2.75 },
+          { "start_date": "2024-03-06T00:00:00.000Z", "end_date": "2024-03-20T00:00:00.000Z", "price": 3.00 },
+          { "start_date": "2024-03-21T00:00:00.000Z", "end_date": "2024-04-15T00:00:00.000Z", "price": 3.80 }
         ]
       },
       {
         "storeProductId": 14570,
         "store": "IGA",
-        "price": 3.85,
+        "standardPrice": 3.85,
         "productUrl": "https://www.igashop.com.au/product/coca-cola-classic-soft-drink-bottle-14570",
         "priceHistory": [
-          [new Date('2024-04-05'), new Date('2024-04-18'), 2.99],
-          [new Date('2024-04-19'), new Date('2024-05-05'), 2.70],
-          [new Date('2024-05-06'), new Date('2024-05-25'), 3.05],
-          [new Date('2024-05-26'), new Date('2024-06-10'), 2.55],
-          [new Date('2024-06-11'), new Date('2024-06-30'), 3.85],
+          { "start_date": "2024-04-05T00:00:00.000Z", "end_date": "2024-04-18T00:00:00.000Z", "price": 2.99 },
+          { "start_date": "2024-04-19T00:00:00.000Z", "end_date": "2024-05-05T00:00:00.000Z", "price": 2.70 },
+          { "start_date": "2024-05-06T00:00:00.000Z", "end_date": "2024-05-25T00:00:00.000Z", "price": 3.05 },
+          { "start_date": "2024-05-26T00:00:00.000Z", "end_date": "2024-06-10T00:00:00.000Z", "price": 2.55 },
+          { "start_date": "2024-06-11T00:00:00.000Z", "end_date": "2024-06-30T00:00:00.000Z", "price": 3.85 }
         ]
-      },
+      }
     ]
   }
 
   const [currStoreProduct, setCurrStoreProduct] = useState<StoreProduct>(productData["storeProducts"][0])
-  const minPrice: number = Math.min(...productData.storeProducts.map(storeProduct => storeProduct.price));
+  const minPrice: number = Math.min(...productData.storeProducts.map(storeProduct => storeProduct.standardPrice));
 
   const handleStoreClick = (storeProduct: StoreProduct) => {
     if (currStoreProduct && currStoreProduct.store === storeProduct.store) {
@@ -145,14 +149,14 @@ export default function Product({ params }: ProductPageProps) {
                       }
                     `}>
                     <span>{storeProduct.store}</span>
-                    {storeProduct.price === minPrice && 
+                    {storeProduct.standardPrice === minPrice && 
                       <Image src="/Gold Medal.svg" alt="Medal" width={20} height={20}/>
                     }
                   </div>
                 ))}
               </div>
               <CardTitle className="text-3xl">{productData.name}</CardTitle>
-              <p className="text-xl font-bold">${currStoreProduct.price.toFixed(2)}</p>
+              <p className="text-xl font-bold">${currStoreProduct.standardPrice.toFixed(2)}</p>
             </CardHeader>
             <CardContent className="flex flex-col mt-5">
               <p>{productData.description}</p>
