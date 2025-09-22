@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/store-product")
+@CrossOrigin(origins = "http://localhost:3000")
 public class StoreProductController {
 
     @Autowired

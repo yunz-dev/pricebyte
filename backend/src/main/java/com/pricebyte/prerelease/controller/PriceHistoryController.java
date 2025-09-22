@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/price-history")
+@CrossOrigin(origins = "http://localhost:3000")
 public class PriceHistoryController {
 
     @Autowired
