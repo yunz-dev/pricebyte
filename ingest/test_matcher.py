@@ -172,13 +172,13 @@ class TestProductMatcher:
     
     def test_calculate_similarity_score(self, matcher):
         score = matcher._calculate_similarity_score(
-            "Japanese Infusion Salmon", "Huon", "200g",
-            "Japanese Fusion Salmon", "Huon", "200g"
+            "Japanese Infusion Salmon", "Huon", "seafood", "200g",
+            "Japanese Fusion Salmon", "Huon", "seafood", "200g"
         )
         assert score > 0.8
         
         score = matcher._calculate_similarity_score(
-            "Japanese Infusion Salmon", "Huon", "200g",
-            "Completely Different Product", "Different Brand", "500g"
+            "Japanese Infusion Salmon", "Huon", "seafood", "200g",
+            "Completely Different Product", "Different Brand", "beverages", "500g"
         )
         assert score < 0.5
